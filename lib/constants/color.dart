@@ -9,6 +9,7 @@ abstract final class BumditbulColor {
   /// green
   static const Color green400 = Color(0xFF66BB6A);
   static const Color green600 = Color(0xFF43A047);
+  static const Color green800 = Color(0xFF2E7D32);
 
   /// black
   static const Color black50 = Color(0xFFFAFAFA);
