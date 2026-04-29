@@ -26,7 +26,7 @@ class DifficultyDropdown extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: () => _showDropdown(context),
-          borderRadius: radiusS,
+          borderRadius: AppDimens.roundedS,
           child: Container(
             width: width,
             padding: const EdgeInsets.all(10),

@@ -23,7 +23,7 @@ class StudyListButton extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: radiusXXL,
+          borderRadius: AppDimens.roundedTopXXL,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
