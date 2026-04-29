@@ -40,7 +40,7 @@ class BumditbulTextStyle {
   );
 
   static TextStyle bodyMedium2 = defaultTextStyle.copyWith(
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: FontWeight.w500,
   );
 
