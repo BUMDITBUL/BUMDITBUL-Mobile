@@ -1,15 +1,18 @@
 import 'dart:async';
 
+import 'package:bumditbul_mobile/constants/app_dimens.dart';
+import 'package:bumditbul_mobile/constants/app_strings.dart';
 import 'package:bumditbul_mobile/constants/color.dart';
 import 'package:bumditbul_mobile/constants/text_style.dart';
 import 'package:bumditbul_mobile/core/components/button/default_button.dart';
 import 'package:bumditbul_mobile/core/components/text_form_field/text_form_field.dart';
 import 'package:bumditbul_mobile/core/components/text_form_field/text_form_field_label.dart';
 import 'package:bumditbul_mobile/core/features/auth/presentation/providers/auth_providers.dart';
+import 'package:bumditbul_mobile/core/features/auth/presentation/widgets/school_search_sheet.dart';
+import 'package:bumditbul_mobile/core/router/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class SignupView extends ConsumerStatefulWidget {
   const SignupView({super.key});
@@ -105,39 +108,39 @@ class _SignupViewState extends ConsumerState<SignupView> {
   }
 
   String? _validateEmail(String? value) {
-    if (value == null || value.isEmpty) return '⚠︎ 이메일을 입력해주세요.';
-    if (!value.contains('@')) return '⚠︎ 이메일 형식이 올바르지 않습니다.';
+    if (value == null || value.isEmpty) return AppStrings.errEmailEmpty;
+    if (!value.contains('@')) return AppStrings.errEmailInvalid;
     return null;
   }
 
   String? _validateCode(String? value) {
-    if (value == null || value.isEmpty) return '인증번호를 입력해주세요.';
-    if (value.length < 6) return '⚠︎ 인증번호를 다시 확인해주세요.';
+    if (value == null || value.isEmpty) return AppStrings.errCodeEmpty;
+    if (value.length < 6) return AppStrings.errCodeInvalid;
     return null;
   }
 
   String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty) return '⚠︎ 비밀번호를 입력해주세요.';
+    if (value == null || value.isEmpty) return AppStrings.errPasswordEmpty;
     if (value.length < 8 ||
         !value.contains(RegExp(r'[!@#\$%^&*(),.?":{}|<>]'))) {
-      return '⚠︎ 비밀번호 형식이 올바르지 않습니다.';
+      return AppStrings.errPasswordInvalid;
     }
     return null;
   }
 
   String? _validatePasswordConfirm(String? value) {
-    if (value == null || value.isEmpty) return '⚠︎ 비밀번호 확인을 입력해주세요.';
-    if (value != _passwordController.text) return '⚠︎ 비밀번호가 일치하지 않습니다.';
+    if (value == null || value.isEmpty) return AppStrings.errPasswordConfirmEmpty;
+    if (value != _passwordController.text) return AppStrings.errPasswordMismatch;
     return null;
   }
 
   String? _validateNickname(String? value) {
-    if (value == null || value.isEmpty) return '⚠︎ 닉네임을 입력해주세요.';
+    if (value == null || value.isEmpty) return AppStrings.errNicknameEmpty;
     return null;
   }
 
   String? _validateSchoolName(String? value) {
-    if (value == null || value.isEmpty) return '⚠︎ 학교명을 입력해주세요.';
+    if (value == null || value.isEmpty) return AppStrings.errSchoolEmpty;
     return null;
   }
 
@@ -148,31 +151,25 @@ class _SignupViewState extends ConsumerState<SignupView> {
   }) {
     return InputDecoration(
       hintText: hintText,
-      hintStyle: BumditbulTextStyle.buttonMedium.copyWith(
-        color: BumditbulColor.black700,
-      ),
+      hintStyle: BumditbulTextStyle.buttonMedium
+          .copyWith(color: BumditbulColor.black700),
       suffixIcon: suffix,
       suffixIconConstraints: suffixConstraints,
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: BumditbulColor.black600),
-      ),
+          borderRadius: AppDimens.roundedS,
+          borderSide: const BorderSide(color: BumditbulColor.black600)),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: BumditbulColor.black600),
-      ),
+          borderRadius: AppDimens.roundedS,
+          borderSide: const BorderSide(color: BumditbulColor.black600)),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: BumditbulColor.green400),
-      ),
+          borderRadius: AppDimens.roundedS,
+          borderSide: const BorderSide(color: BumditbulColor.green400)),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: BumditbulColor.red),
-      ),
+          borderRadius: AppDimens.roundedS,
+          borderSide: const BorderSide(color: BumditbulColor.red)),
       focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: BumditbulColor.red),
-      ),
+          borderRadius: AppDimens.roundedS,
+          borderSide: const BorderSide(color: BumditbulColor.red)),
     );
   }
 
@@ -180,50 +177,36 @@ class _SignupViewState extends ConsumerState<SignupView> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authStateProvider);
 
-    ref.listen(authStateProvider, (previous, next) async {
+    ref.listen(authStateProvider, (previous, next) {
       if (next.isAuthenticated && !next.isLoading) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('회원가입이 완료되었습니다. 로그인 해주세요.'),
-              behavior: SnackBarBehavior.floating,
-              duration: Duration(seconds: 2),
-              backgroundColor: BumditbulColor.green800,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          );
+          context.go(AppRoutes.subjectGrade, extra: _nicknameController.text);
         }
-        await ref.read(authStateProvider.notifier).logout();
-        if (context.mounted) context.go('/');
       }
     });
 
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: AppDimens.pagePadding,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 8),
+              AppDimens.gap8,
               IconButton(
                 onPressed: () {
                   if (_step == 2) {
                     setState(() => _step = 1);
                   } else {
-                    context.go('/');
+                    context.go(AppRoutes.splash);
                   }
                 },
-                icon: const Icon(
-                  Icons.arrow_back_ios,
-                  color: BumditbulColor.white,
-                ),
+                icon: const Icon(Icons.arrow_back_ios,
+                    color: BumditbulColor.white),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
               ),
-              const SizedBox(height: 24),
+              AppDimens.gap24,
               Text(
                 '회원가입',
                 style: BumditbulTextStyle.headline2.copyWith(
@@ -231,13 +214,13 @@ class _SignupViewState extends ConsumerState<SignupView> {
                   fontSize: 22,
                 ),
               ),
-              const SizedBox(height: 40),
+              AppDimens.gap40,
               Expanded(
                 child: _step == 1 ? _buildStep1() : _buildStep2(authState),
               ),
-              const SizedBox(height: 20),
+              AppDimens.gap20,
               _buildBottomButton(authState),
-              const SizedBox(height: 24),
+              AppDimens.gap24,
             ],
           ),
         ),
@@ -252,8 +235,8 @@ class _SignupViewState extends ConsumerState<SignupView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CustomTextFormFieldLabel(labelText: '이메일'),
-            const SizedBox(height: 10),
+            CustomTextFormFieldLabel(labelText: AppStrings.labelEmail),
+            AppDimens.gap10,
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -261,11 +244,11 @@ class _SignupViewState extends ConsumerState<SignupView> {
                   child: CustomTextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: _fieldDecoration(hintText: '이메일을 입력해주세요.'),
+                    decoration: _fieldDecoration(hintText: AppStrings.hintEmail),
                     validator: _validateEmail,
                   ),
                 ),
-                const SizedBox(width: 10),
+                AppDimens.gapH10,
                 SizedBox(
                   width: 80,
                   height: 43,
@@ -279,29 +262,27 @@ class _SignupViewState extends ConsumerState<SignupView> {
                           : BumditbulColor.black600,
                       disabledBackgroundColor: BumditbulColor.black600,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                          borderRadius: AppDimens.roundedS),
                       padding: EdgeInsets.zero,
                     ),
                     child: Text(
-                      '인증번호',
-                      style: BumditbulTextStyle.bodyMedium1.copyWith(
-                        color: BumditbulColor.white,
-                      ),
+                      AppStrings.labelCode,
+                      style: BumditbulTextStyle.bodyMedium1
+                          .copyWith(color: BumditbulColor.white),
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
-            CustomTextFormFieldLabel(labelText: '인증번호'),
-            const SizedBox(height: 10),
+            AppDimens.gap20,
+            CustomTextFormFieldLabel(labelText: AppStrings.labelCode),
+            AppDimens.gap10,
             CustomTextFormField(
               controller: _verificationCodeController,
               keyboardType: TextInputType.number,
               readOnly: !_isCodeSent,
               decoration: _fieldDecoration(
-                hintText: '인증번호 6자리 입력해주세요.',
+                hintText: AppStrings.hintCode,
                 suffix: _isCodeSent
                     ? Padding(
                         padding: const EdgeInsets.only(right: 12),
@@ -320,14 +301,14 @@ class _SignupViewState extends ConsumerState<SignupView> {
               ),
               validator: _isCodeSent ? _validateCode : null,
             ),
-            const SizedBox(height: 20),
-            CustomTextFormFieldLabel(labelText: '비밀번호'),
-            const SizedBox(height: 10),
+            AppDimens.gap20,
+            CustomTextFormFieldLabel(labelText: AppStrings.labelPassword),
+            AppDimens.gap10,
             CustomTextFormField(
               controller: _passwordController,
               obscureText: _obscurePassword,
               decoration: _fieldDecoration(
-                hintText: '8자 이상 특수문자를 포함하여 입력해주세요.',
+                hintText: AppStrings.hintPassword,
                 suffix: IconButton(
                   icon: Icon(
                     _obscurePassword
@@ -342,14 +323,15 @@ class _SignupViewState extends ConsumerState<SignupView> {
               ),
               validator: _validatePassword,
             ),
-            const SizedBox(height: 20),
-            CustomTextFormFieldLabel(labelText: '비밀번호 확인'),
-            const SizedBox(height: 10),
+            AppDimens.gap20,
+            CustomTextFormFieldLabel(
+                labelText: AppStrings.labelPasswordConfirm),
+            AppDimens.gap10,
             CustomTextFormField(
               controller: _passwordConfirmController,
               obscureText: _obscurePasswordConfirm,
               decoration: _fieldDecoration(
-                hintText: '8자 이상 특수문자를 포함하여 입력해주세요.',
+                hintText: AppStrings.hintPassword,
                 suffix: IconButton(
                   icon: Icon(
                     _obscurePasswordConfirm
@@ -358,9 +340,8 @@ class _SignupViewState extends ConsumerState<SignupView> {
                     color: BumditbulColor.black400,
                     size: 20,
                   ),
-                  onPressed: () => setState(
-                    () => _obscurePasswordConfirm = !_obscurePasswordConfirm,
-                  ),
+                  onPressed: () => setState(() =>
+                      _obscurePasswordConfirm = !_obscurePasswordConfirm),
                 ),
               ),
               validator: _validatePasswordConfirm,
@@ -378,75 +359,63 @@ class _SignupViewState extends ConsumerState<SignupView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CustomTextFormFieldLabel(labelText: '닉네임'),
-            const SizedBox(height: 10),
+            CustomTextFormFieldLabel(labelText: AppStrings.labelNickname),
+            AppDimens.gap10,
             CustomTextFormField(
               controller: _nicknameController,
-              decoration: _fieldDecoration(hintText: '닉네임을 입력해주세요.'),
+              decoration: _fieldDecoration(hintText: AppStrings.hintNickname),
               validator: _validateNickname,
+              maxLength: 8,
             ),
             if (authState.error != null) ...[
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: BumditbulColor.red.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  authState.error!,
-                  style: BumditbulTextStyle.bodySmall.copyWith(
-                    color: BumditbulColor.red,
-                  ),
-                ),
-              ),
+              AppDimens.gap16,
+              _ErrorBox(message: authState.error!),
             ],
-            const SizedBox(height: 20),
-            CustomTextFormFieldLabel(labelText: '교명'),
-            const SizedBox(height: 10),
-            CustomTextFormField(
-              controller: _schoolController,
-              decoration: _fieldDecoration(
-                hintText: '교명을 입력해주세요.',
-                suffix: Padding(
-                  padding: EdgeInsets.only(right: 12),
-                  child: Icon(Symbols.search),
+            AppDimens.gap20,
+            CustomTextFormFieldLabel(labelText: AppStrings.labelSchool),
+            AppDimens.gap10,
+            GestureDetector(
+              onTap: () async {
+                FocusScope.of(context).unfocus();
+                final selected = await showSchoolSearchSheet(context);
+                if (selected != null) {
+                  _schoolController.text = selected;
+                  setState(() {});
+                }
+              },
+              child: AbsorbPointer(
+                child: CustomTextFormField(
+                  controller: _schoolController,
+                  readOnly: true,
+                  decoration: _fieldDecoration(
+                    hintText: AppStrings.hintSchool,
+                    suffix: const Padding(
+                      padding: EdgeInsets.only(right: 12),
+                      child: Icon(Icons.search,
+                          color: BumditbulColor.black400, size: 20),
+                    ),
+                  ),
+                  validator: _validateSchoolName,
                 ),
               ),
-              validator: _validateSchoolName,
             ),
-            const SizedBox(height: 5),
+            AppDimens.gap6,
             RichText(
               text: TextSpan(
-                style: BumditbulTextStyle.buttonMedium.copyWith(
-                  color: BumditbulColor.black500,
-                ),
-                children: [
-                  TextSpan(text: '시험 당일 {username}님을 응원해드려요. '),
+                style: BumditbulTextStyle.buttonMedium
+                    .copyWith(color: BumditbulColor.black500),
+                children: const [
+                  TextSpan(text: '시험 당일 응원해드려요. '),
                   TextSpan(
                     text: '(필수X)',
-                    style: BumditbulTextStyle.buttonMedium.copyWith(
-                      color: BumditbulColor.green400,
-                    ),
+                    style: TextStyle(color: BumditbulColor.green400),
                   ),
                 ],
               ),
             ),
             if (authState.error != null) ...[
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: BumditbulColor.red.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  authState.error!,
-                  style: BumditbulTextStyle.bodySmall.copyWith(
-                    color: BumditbulColor.red,
-                  ),
-                ),
-              ),
+              AppDimens.gap16,
+              _ErrorBox(message: authState.error!),
             ],
           ],
         ),
@@ -484,6 +453,9 @@ class _SignupViewState extends ConsumerState<SignupView> {
                       email: _emailController.text,
                       password: _passwordController.text,
                       nickname: _nicknameController.text,
+                      school: _schoolController.text.isNotEmpty
+                          ? _schoolController.text
+                          : null,
                     );
               }
             },
@@ -502,6 +474,31 @@ class _SignupViewState extends ConsumerState<SignupView> {
                 color: BumditbulColor.white,
               ),
             ),
+    );
+  }
+}
+
+class _ErrorBox extends StatelessWidget {
+  final String message;
+
+  const _ErrorBox({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: BumditbulColor.red.withOpacity(0.1),
+        borderRadius: AppDimens.roundedS,
+        border: Border.all(color: BumditbulColor.red),
+      ),
+      child: Text(
+        message,
+        style: BumditbulTextStyle.bodyMedium1.copyWith(
+          color: BumditbulColor.red,
+        ),
+      ),
     );
   }
 }

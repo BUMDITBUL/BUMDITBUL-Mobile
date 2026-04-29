@@ -1,9 +1,12 @@
+import 'package:bumditbul_mobile/constants/app_dimens.dart';
+import 'package:bumditbul_mobile/constants/app_strings.dart';
 import 'package:bumditbul_mobile/constants/color.dart';
 import 'package:bumditbul_mobile/constants/text_style.dart';
 import 'package:bumditbul_mobile/core/components/button/default_button.dart';
 import 'package:bumditbul_mobile/core/components/text_form_field/text_form_field.dart';
 import 'package:bumditbul_mobile/core/components/text_form_field/text_form_field_label.dart';
 import 'package:bumditbul_mobile/core/features/auth/presentation/providers/auth_providers.dart';
+import 'package:bumditbul_mobile/core/router/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -44,34 +47,41 @@ class _LoginViewState extends ConsumerState<LoginView> {
       _emailController.text.isNotEmpty && _passwordController.text.isNotEmpty;
 
   String? _validateEmail(String? value) {
-    if (value == null || value.isEmpty) return '이메일을 입력해주세요';
-    if (!value.contains('@')) return '⚠︎ 이메일 형식이 올바르지 않습니다.';
+    if (value == null || value.isEmpty) return AppStrings.errEmailEmpty;
+    if (!value.contains('@')) return AppStrings.errEmailInvalid;
     return null;
   }
 
   String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty) return '비밀번호를 입력해주세요';
-    if (value.length < 6) return '⚠︎ 비밀번호 형식이 올바르지 않습니다.';
+    if (value == null || value.isEmpty) return AppStrings.errPasswordEmpty;
+    if (value.length < 6) return AppStrings.errPasswordInvalid;
     return null;
   }
 
   InputDecoration _fieldDecoration({required String hintText, Widget? suffix}) {
     return InputDecoration(
       hintText: hintText,
-      hintStyle: BumditbulTextStyle.buttonLarge2.copyWith(
-        color: BumditbulColor.black500,
-      ),
+      hintStyle: BumditbulTextStyle.buttonLarge2
+          .copyWith(color: BumditbulColor.black500),
       suffixIcon: suffix,
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: AppDimens.roundedS,
         borderSide: const BorderSide(color: BumditbulColor.black600),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: AppDimens.roundedS,
         borderSide: const BorderSide(color: BumditbulColor.black600),
       ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: AppDimens.roundedS,
+        borderSide: const BorderSide(color: BumditbulColor.green400),
+      ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: AppDimens.roundedS,
+        borderSide: const BorderSide(color: BumditbulColor.red),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: AppDimens.roundedS,
         borderSide: const BorderSide(color: BumditbulColor.red),
       ),
     );
@@ -83,28 +93,26 @@ class _LoginViewState extends ConsumerState<LoginView> {
 
     ref.listen(authStateProvider, (previous, next) {
       if (next.isAuthenticated && !next.isLoading) {
-        context.go('/main');
+        context.go(AppRoutes.main);
       }
     });
 
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: AppDimens.pagePadding,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 8),
+              AppDimens.gap8,
               IconButton(
-                onPressed: () => context.go('/'),
-                icon: const Icon(
-                  Icons.arrow_back_ios,
-                  color: BumditbulColor.white,
-                ),
+                onPressed: () => context.go(AppRoutes.splash),
+                icon: const Icon(Icons.arrow_back_ios,
+                    color: BumditbulColor.white),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
               ),
-              const SizedBox(height: 24),
+              AppDimens.gap24,
               Text(
                 '로그인',
                 style: BumditbulTextStyle.headline2.copyWith(
@@ -112,7 +120,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                   fontSize: 22,
                 ),
               ),
-              const SizedBox(height: 40),
+              AppDimens.gap40,
               Expanded(
                 child: SingleChildScrollView(
                   child: Form(
@@ -120,24 +128,25 @@ class _LoginViewState extends ConsumerState<LoginView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        CustomTextFormFieldLabel(labelText: '이메일'),
-                        const SizedBox(height: 8),
+                        CustomTextFormFieldLabel(
+                            labelText: AppStrings.labelEmail),
+                        AppDimens.gap8,
                         CustomTextFormField(
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
                           decoration: _fieldDecoration(
-                            hintText: '이메일을 입력해주세요.',
-                          ),
+                              hintText: AppStrings.hintEmail),
                           validator: _validateEmail,
                         ),
-                        const SizedBox(height: 24),
-                        CustomTextFormFieldLabel(labelText: '비밀번호'),
-                        const SizedBox(height: 8),
+                        AppDimens.gap24,
+                        CustomTextFormFieldLabel(
+                            labelText: AppStrings.labelPassword),
+                        AppDimens.gap8,
                         CustomTextFormField(
                           controller: _passwordController,
                           obscureText: _obscurePassword,
                           decoration: _fieldDecoration(
-                            hintText: '8자 이상 특수문자를 포함하여 입력해주세요.',
+                            hintText: AppStrings.hintPassword,
                             suffix: IconButton(
                               icon: Icon(
                                 _obscurePassword
@@ -147,33 +156,21 @@ class _LoginViewState extends ConsumerState<LoginView> {
                                 size: 20,
                               ),
                               onPressed: () => setState(
-                                () => _obscurePassword = !_obscurePassword,
-                              ),
+                                  () => _obscurePassword = !_obscurePassword),
                             ),
                           ),
                           validator: _validatePassword,
                         ),
-                        const SizedBox(height: 24),
-                        if (authState.error != null)
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: BumditbulColor.red.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              authState.error!,
-                              style: BumditbulTextStyle.bodySmall.copyWith(
-                                color: BumditbulColor.red,
-                              ),
-                            ),
-                          ),
+                        if (authState.error != null) ...[
+                          AppDimens.gap24,
+                          _ErrorBox(message: authState.error!),
+                        ],
                       ],
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              AppDimens.gap24,
               DefaultButton(
                 onPressed: authState.isLoading || !_isFormValid
                     ? null
@@ -192,21 +189,40 @@ class _LoginViewState extends ConsumerState<LoginView> {
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            BumditbulColor.white,
-                          ),
+                              BumditbulColor.white),
                         ),
                       )
                     : Text(
                         '로그인',
-                        style: BumditbulTextStyle.bodyLarge1.copyWith(
-                          color: BumditbulColor.white,
-                        ),
+                        style: BumditbulTextStyle.bodyLarge1
+                            .copyWith(color: BumditbulColor.white),
                       ),
               ),
-              const SizedBox(height: 24),
+              AppDimens.gap24,
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// 에러 메시지 박스 (login / signup 공용)
+class _ErrorBox extends StatelessWidget {
+  final String message;
+  const _ErrorBox({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: BumditbulColor.red.withValues(alpha: 0.1),
+        borderRadius: AppDimens.roundedS,
+      ),
+      child: Text(
+        message,
+        style: BumditbulTextStyle.bodySmall.copyWith(color: BumditbulColor.red),
       ),
     );
   }
