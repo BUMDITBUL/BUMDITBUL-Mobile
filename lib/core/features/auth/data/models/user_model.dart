@@ -10,12 +10,27 @@ class UserModel extends User {
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    // Defensive parsing with proper type checking
+    final id = json['id'];
+    final email = json['email'];
+    final nickname = json['nickname'];
+
+    if (id == null || id is! String || id.isEmpty) {
+      throw FormatException('Invalid or missing id in UserModel.fromJson');
+    }
+    if (email == null || email is! String || email.isEmpty) {
+      throw FormatException('Invalid or missing email in UserModel.fromJson');
+    }
+    if (nickname == null || nickname is! String || nickname.isEmpty) {
+      throw FormatException('Invalid or missing nickname in UserModel.fromJson');
+    }
+
     return UserModel(
-      id: json['id'] as String,
-      email: json['email'] as String,
-      nickname: json['nickname'] as String,
-      school: json['school'] as String?,
-      token: json['token'] as String?,
+      id: id,
+      email: email,
+      nickname: nickname,
+      school: json['school']?.toString(),
+      token: json['token']?.toString(),
     );
   }
 

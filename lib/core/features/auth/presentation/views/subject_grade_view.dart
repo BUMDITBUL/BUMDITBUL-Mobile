@@ -6,12 +6,35 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+int _nextId = 0;
+
+Widget dismissBackground({
+  required EdgeInsets margin,
+  required double borderRadius,
+}) {
+  return Container(
+    margin: margin,
+    decoration: BoxDecoration(
+      color: Colors.red,
+      borderRadius: BorderRadius.circular(borderRadius),
+    ),
+    alignment: Alignment.centerRight,
+    padding: const EdgeInsets.only(right: 20),
+    child: const Icon(
+      Icons.delete,
+      color: Colors.white,
+    ),
+  );
+}
+
 class SubjectEntry {
+  final int id;
   final TextEditingController nameController;
   String difficulty;
 
   SubjectEntry()
-      : nameController = TextEditingController(),
+      : id = _nextId++,
+        nameController = TextEditingController(),
         difficulty = '중';
 
   void dispose() => nameController.dispose();
@@ -154,7 +177,7 @@ class _SubjectGradeViewState extends ConsumerState<SubjectGradeView> {
     SubjectEntriesNotifier notifier,
   ) {
     return Dismissible(
-      key: Key('grade_entry_$index'),
+      key: Key('grade_entry_${subject.id}'),
       direction: DismissDirection.endToStart,
       onDismissed: (_) {
         notifier.remove(index);

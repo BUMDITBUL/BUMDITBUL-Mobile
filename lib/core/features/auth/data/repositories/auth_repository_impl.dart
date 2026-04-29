@@ -32,12 +32,14 @@ class AuthRepositoryImpl implements AuthRepository {
     required String email,
     required String password,
     required String nickname,
+    String? school,
   }) async {
     try {
       final userModel = await remoteDataSource.signup(
         email: email,
         password: password,
         nickname: nickname,
+        school: school,
       );
 
       _cachedToken = userModel.token;
@@ -52,11 +54,11 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<User?> getCurrentUser() async {
     try {
-      if (_cachedUser != null && _cachedToken != null) {
+      if (_cachedUser != null && _cachedToken != null && _cachedToken!.isNotEmpty) {
         return _cachedUser;
       }
 
-      if (_cachedToken != null) {
+      if (_cachedToken != null && _cachedToken!.isNotEmpty) {
         final userModel = await remoteDataSource.getCurrentUser(
           token: _cachedToken!,
         );

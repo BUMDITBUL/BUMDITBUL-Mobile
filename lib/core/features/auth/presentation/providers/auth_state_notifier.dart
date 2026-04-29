@@ -4,6 +4,8 @@ import 'package:bumditbul_mobile/core/features/auth/domain/usecases/signup_useca
 import 'package:equatable/equatable.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+const _unsetUser = Object();
+
 class AuthState extends Equatable {
   final User? user;
   final bool isLoading;
@@ -18,13 +20,13 @@ class AuthState extends Equatable {
   });
 
   AuthState copyWith({
-    User? user,
+    Object? user = _unsetUser,
     bool? isLoading,
     String? error,
     bool? isAuthenticated,
   }) {
     return AuthState(
-      user: user ?? this.user,
+      user: user == _unsetUser ? this.user : user as User?,
       isLoading: isLoading ?? this.isLoading,
       error: error,
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
@@ -75,15 +77,16 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
 
     try {
       final user = await signupUseCase(
-        SignupParams(email: email, password: password, nickname: nickname),
+        SignupParams(
+          email: email,
+          password: password,
+          nickname: nickname,
+          school: school,
+        ),
       );
 
-      final userWithSchool = school != null && school.isNotEmpty
-          ? user.copyWith(school: school)
-          : user;
-
       state = state.copyWith(
-        user: userWithSchool,
+        user: user,
         isAuthenticated: true,
         isLoading: false,
         error: null,

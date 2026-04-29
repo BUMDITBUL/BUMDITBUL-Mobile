@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+const _unset = Object();
+
 class User extends Equatable {
   final String id;
   final String email;
@@ -22,15 +24,15 @@ class User extends Equatable {
     String? id,
     String? email,
     String? nickname,
-    String? school,
-    String? token,
+    Object? school = _unset,
+    Object? token = _unset,
   }) {
     return User(
       id: id ?? this.id,
       email: email ?? this.email,
       nickname: nickname ?? this.nickname,
-      school: school ?? this.school,
-      token: token ?? this.token,
+      school: school == _unset ? this.school : school as String?,
+      token: token == _unset ? this.token : token as String?,
     );
   }
 }
