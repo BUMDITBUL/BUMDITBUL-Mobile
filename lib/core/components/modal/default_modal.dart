@@ -45,62 +45,64 @@ class DefaultModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 20,
-        right: 20,
-        top: 20,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: BumditbulColor.black600,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                title,
-                style: BumditbulTextStyle.headline3.copyWith(
-                  color: BumditbulColor.white,
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 20,
+          right: 20,
+          top: 20,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: BumditbulColor.black600,
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              GestureDetector(
-                onTap: onClose ?? () => Navigator.of(context).pop(),
-                child: const Icon(
-                  Icons.close,
-                  color: BumditbulColor.black400,
-                  size: 20,
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  title,
+                  style: BumditbulTextStyle.headline3.copyWith(
+                    color: BumditbulColor.white,
+                  ),
+                ),
+                IconButton(
+                  onPressed: onClose ?? () => Navigator.of(context).pop(),
+                  icon: const Icon(
+                    Icons.close,
+                    color: BumditbulColor.black400,
+                    size: 20,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            content,
+            if (onConfirm != null) ...[
+              const SizedBox(height: 20),
+              DefaultButton(
+                onPressed: onConfirm,
+                child: Text(
+                  confirmLabel ?? '확인',
+                  style: BumditbulTextStyle.bodyLarge1.copyWith(
+                    color: BumditbulColor.white,
+                  ),
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 20),
-          content,
-          if (onConfirm != null) ...[
-            const SizedBox(height: 20),
-            DefaultButton(
-              onPressed: onConfirm,
-              child: Text(
-                confirmLabel ?? '확인',
-                style: BumditbulTextStyle.bodyLarge1.copyWith(
-                  color: BumditbulColor.white,
-                ),
-              ),
-            ),
           ],
-        ],
+        ),
       ),
     );
   }

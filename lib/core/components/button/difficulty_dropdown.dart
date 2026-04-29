@@ -1,5 +1,6 @@
 import 'package:bumditbul_mobile/constants/color.dart';
 import 'package:bumditbul_mobile/constants/text_style.dart';
+import 'package:bumditbul_mobile/constants/app_dimens.dart';
 import 'package:flutter/material.dart';
 
 class DifficultyDropdown extends StatelessWidget {
@@ -18,42 +19,52 @@ class DifficultyDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => _showDropdown(context),
-      child: Container(
-        width: width,
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: BumditbulColor.black800,
-          border: Border.all(color: BumditbulColor.black600, width: 0.5),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              value,
-              style: BumditbulTextStyle.bodyMedium1.copyWith(
-                color: BumditbulColor.white,
-              ),
+    return Semantics(
+      button: true,
+      label: '난이도 선택',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _showDropdown(context),
+          borderRadius: radiusS,
+          child: Container(
+            width: width,
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: BumditbulColor.black800,
+              border: Border.all(color: BumditbulColor.black600, width: 0.5),
+              borderRadius: BorderRadius.circular(8),
             ),
-            const SizedBox(width: 4),
-            const Icon(
-              Icons.keyboard_arrow_down,
-              color: BumditbulColor.black400,
-              size: 16,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  value,
+                  style: BumditbulTextStyle.bodyMedium1.copyWith(
+                    color: BumditbulColor.white,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                const Icon(
+                  Icons.keyboard_arrow_down,
+                  color: BumditbulColor.black400,
+                  size: 16,
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 
   void _showDropdown(BuildContext context) async {
-    final RenderBox box = context.findRenderObject() as RenderBox;
-    final RenderBox overlay =
-        Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
+    final boxObject = context.findRenderObject();
+    final overlayObject = Navigator.of(context).overlay?.context.findRenderObject();
+    if (boxObject is! RenderBox || overlayObject is! RenderBox) return;
+    final RenderBox box = boxObject;
+    final RenderBox overlay = overlayObject;
 
     final position = RelativeRect.fromRect(
       Rect.fromPoints(

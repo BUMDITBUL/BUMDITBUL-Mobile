@@ -4,11 +4,7 @@ import 'package:bumditbul_mobile/constants/color.dart';
 import 'package:bumditbul_mobile/constants/text_style.dart';
 import 'package:flutter/material.dart';
 
-/// 앱 전역 공통 다이얼로그
 abstract final class AppDialog {
-  // ── 저장하지 않고 나가기 확인 ─────────────────────────────────────────
-  /// 변경 내용이 있을 때 뒤로가기 전 확인 다이얼로그.
-  /// 나가기 → true, 취소 → false/null 반환.
   static Future<bool?> showUnsaved(BuildContext context) {
     return _showConfirm(
       context: context,
@@ -21,8 +17,6 @@ abstract final class AppDialog {
     );
   }
 
-  // ── 회원탈퇴 확인 ──────────────────────────────────────────────────────
-  /// 탈퇴하기 → true, 취소 → false/null 반환.
   static Future<bool?> showWithdrawal(BuildContext context) {
     return _showConfirm(
       context: context,
@@ -35,7 +29,6 @@ abstract final class AppDialog {
     );
   }
 
-  // ── 내부 공통 구현 ─────────────────────────────────────────────────────
   static Future<bool?> _showConfirm({
     required BuildContext context,
     required IconData icon,
