@@ -190,7 +190,7 @@ class _SubjectGradeViewState extends ConsumerState<SubjectGradeView> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: BumditbulColor.black800,
+          color: BumditbulColor.black850,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: BumditbulColor.black700, width: 0.5),
         ),

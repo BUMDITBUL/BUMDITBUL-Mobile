@@ -128,9 +128,9 @@ class _ScheduleSubjectTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: BumditbulColor.black800,
+        color: BumditbulColor.black850,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: BumditbulColor.black800, width: 1),
+        border: Border.all(color: BumditbulColor.black850, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,7 +170,7 @@ class _ScheduleSubjectTile extends StatelessWidget {
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
                 value: progress,
-                backgroundColor: BumditbulColor.black800,
+                backgroundColor: BumditbulColor.black850,
                 valueColor: AlwaysStoppedAnimation<Color>(
                   subject.isAllCompleted
                       ? BumditbulColor.green600

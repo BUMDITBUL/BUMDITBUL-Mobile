@@ -48,7 +48,7 @@ class _SubjectGradeEditViewState extends State<SubjectGradeEditView> {
       context: context,
       barrierColor: Colors.black54,
       builder: (ctx) => Dialog(
-        backgroundColor: BumditbulColor.black800,
+        backgroundColor: BumditbulColor.black850,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -249,7 +249,7 @@ class _SubjectGradeEditViewState extends State<SubjectGradeEditView> {
                           child: Container(
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
-                              color: BumditbulColor.black800,
+                              color: BumditbulColor.black850,
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
                                 color: BumditbulColor.black700,

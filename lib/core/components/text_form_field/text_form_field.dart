@@ -117,7 +117,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
   @override
   Widget build(BuildContext context) {
     final Color textColor =
-        _isFocused ? BumditbulColor.white : BumditbulColor.black800;
+        _isFocused ? BumditbulColor.white : BumditbulColor.black850;
 
     final defaultTextStyle = BumditbulTextStyle.buttonLarge2
         .copyWith(color: textColor)

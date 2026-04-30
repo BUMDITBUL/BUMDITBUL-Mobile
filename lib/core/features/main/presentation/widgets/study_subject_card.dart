@@ -29,9 +29,9 @@ class StudySubjectCard extends ConsumerWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
-          color: BumditbulColor.black800,
+          color: BumditbulColor.black850,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: BumditbulColor.black800, width: 1),
+          border: Border.all(color: BumditbulColor.black850, width: 1),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,7 +39,7 @@ class StudySubjectCard extends ConsumerWidget {
             _buildCardHeader(context, ref),
             if (subject.tasks.isNotEmpty) ...[
               const Divider(
-                color: BumditbulColor.black800,
+                color: BumditbulColor.black850,
                 height: 1,
                 indent: 16,
                 endIndent: 16,

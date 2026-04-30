@@ -45,7 +45,7 @@ Future<String?> showSchoolSearchSheet(BuildContext context) {
   return showModalBottomSheet<String>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: BumditbulColor.black800,
+    backgroundColor: BumditbulColor.black850,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -164,7 +164,7 @@ class _SchoolSearchSheetState extends State<_SchoolSearchSheet> {
                   ),
                   contentPadding: const EdgeInsets.symmetric(vertical: 12),
                   filled: true,
-                  fillColor: BumditbulColor.black800,
+                  fillColor: BumditbulColor.black850,
                 ),
                 cursorColor: BumditbulColor.green400,
               ),
@@ -199,7 +199,7 @@ class _SchoolSearchSheetState extends State<_SchoolSearchSheet> {
                       itemCount: _results.length,
                       separatorBuilder: (_, __) => const Divider(
                         height: 1,
-                        color: BumditbulColor.black800,
+                        color: BumditbulColor.black850,
                         indent: 20,
                         endIndent: 20,
                       ),

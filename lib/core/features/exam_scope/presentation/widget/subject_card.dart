@@ -35,7 +35,7 @@ class SubjectCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: BumditbulColor.black800,
+        color: BumditbulColor.black850,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: BumditbulColor.black700, width: 0.5),
       ),

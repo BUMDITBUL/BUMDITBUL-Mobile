@@ -29,7 +29,7 @@ class DefaultModal extends StatelessWidget {
     return showModalBottomSheet<T>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: BumditbulColor.black800,
+      backgroundColor: BumditbulColor.black850,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),

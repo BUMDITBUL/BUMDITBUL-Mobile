@@ -191,7 +191,7 @@ class _ProfileEditViewState extends ConsumerState<ProfileEditView> {
                                     color: BumditbulColor.green600,
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: BumditbulColor.black800,
+                                      color: BumditbulColor.black850,
                                       width: 2,
                                     ),
                                   ),
@@ -297,7 +297,7 @@ class _InputField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: BumditbulColor.black800,
+        color: BumditbulColor.black850,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: BumditbulColor.black700, width: 0.5),
       ),

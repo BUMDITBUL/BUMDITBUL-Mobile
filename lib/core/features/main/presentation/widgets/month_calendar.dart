@@ -32,7 +32,7 @@ class MonthCalendar extends ConsumerWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        color: BumditbulColor.black800,
+        color: BumditbulColor.black850,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(

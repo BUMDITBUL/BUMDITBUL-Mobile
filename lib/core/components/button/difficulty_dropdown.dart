@@ -31,7 +31,7 @@ class DifficultyDropdown extends StatelessWidget {
             width: width,
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: BumditbulColor.black800,
+              color: BumditbulColor.black850,
               border: Border.all(color: BumditbulColor.black600, width: 0.5),
               borderRadius: BorderRadius.circular(8),
             ),
@@ -77,7 +77,7 @@ class DifficultyDropdown extends StatelessWidget {
     final selected = await showMenu<String>(
       context: context,
       position: position,
-      color: BumditbulColor.black800,
+      color: BumditbulColor.black850,
       elevation: 8,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),

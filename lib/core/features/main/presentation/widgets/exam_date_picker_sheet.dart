@@ -9,7 +9,7 @@ Future<DateTime?> showExamDatePickerSheet(
 }) {
   return showModalBottomSheet<DateTime>(
     context: context,
-    backgroundColor: BumditbulColor.black800,
+    backgroundColor: BumditbulColor.black850,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -244,7 +244,7 @@ class _PickerColumn extends StatelessWidget {
             height: itemExtent,
             margin: const EdgeInsets.symmetric(horizontal: 4),
             decoration: BoxDecoration(
-              color: BumditbulColor.black800,
+              color: BumditbulColor.black850,
               borderRadius: BorderRadius.circular(8),
             ),
           ),

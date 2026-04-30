@@ -113,7 +113,7 @@ class HomeView extends ConsumerWidget {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: BumditbulColor.black800,
+                    color: BumditbulColor.black850,
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: BumditbulColor.black700,
@@ -305,7 +305,7 @@ class HomeView extends ConsumerWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 32),
         decoration: BoxDecoration(
-          color: BumditbulColor.black800,
+          color: BumditbulColor.black850,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: BumditbulColor.black700),
         ),
@@ -337,7 +337,7 @@ class HomeView extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: BumditbulColor.black800,
+      backgroundColor: BumditbulColor.black850,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -427,7 +427,7 @@ class _AddSubjectSheetState extends State<_AddSubjectSheet> {
                       child: Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: BumditbulColor.black800,
+                          color: BumditbulColor.black850,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: BumditbulColor.black600,
