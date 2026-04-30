@@ -28,14 +28,15 @@ class ExamRange {
   final ExamMaterial material;
   String startPage;
   String endPage;
-  String customLabel;
+  final TextEditingController customCtrl;
 
   ExamRange({
     required this.material,
     this.startPage = '',
     this.endPage = '',
-    this.customLabel = '',
-  });
+  }) : customCtrl = TextEditingController();
+
+  void dispose() => customCtrl.dispose();
 }
 
 class ExamSubjectEntry {
@@ -49,7 +50,12 @@ class ExamSubjectEntry {
         difficulty = '중',
         ranges = [];
 
-  void dispose() => nameCtrl.dispose();
+  void dispose() {
+    nameCtrl.dispose();
+    for (final r in ranges) {
+      r.dispose();
+    }
+  }
 }
 
 class ExamScopeView extends StatefulWidget {
@@ -97,6 +103,7 @@ class _ExamScopeViewState extends State<ExamScopeView> {
       final entry = _subjects[sIdx];
       final existing = entry.ranges.indexWhere((r) => r.material == mat);
       if (existing >= 0) {
+        entry.ranges[existing].dispose();
         entry.ranges.removeAt(existing);
       } else {
         entry.ranges.add(ExamRange(material: mat));

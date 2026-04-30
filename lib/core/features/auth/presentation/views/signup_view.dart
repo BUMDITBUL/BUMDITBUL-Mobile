@@ -489,7 +489,7 @@ class _ErrorBox extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: BumditbulColor.red.withOpacity(0.1),
+        color: BumditbulColor.red.withValues(alpha: 0.1),
         borderRadius: AppDimens.roundedS,
         border: Border.all(color: BumditbulColor.red),
       ),

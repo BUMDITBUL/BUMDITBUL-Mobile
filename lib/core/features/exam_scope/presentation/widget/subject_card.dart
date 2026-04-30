@@ -158,7 +158,7 @@ class SubjectCard extends StatelessWidget {
                     if (r.material == ExamMaterial.custom)
                       Expanded(
                         child: _BorderedField(
-                          controller: TextEditingController(),
+                          controller: r.customCtrl,
                           hintText: '직접 입력',
                           onChanged: (_) => onChanged(),
                         ),
@@ -220,7 +220,7 @@ class _BorderedField extends StatelessWidget {
         hintStyle: BumditbulTextStyle.bodyMedium1.copyWith(
           color: BumditbulColor.black600,
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(
@@ -235,7 +235,6 @@ class _BorderedField extends StatelessWidget {
             width: 1,
           ),
         ),
-        isDense: true,
       ),
       cursorColor: BumditbulColor.green400,
     );
@@ -250,43 +249,39 @@ class _PageField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 38,
-      child: TextField(
-        onChanged: (_) => onChanged(),
-        keyboardType: TextInputType.number,
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        textAlign: TextAlign.center,
-        style: BumditbulTextStyle.bodyMedium1.copyWith(
-          color: BumditbulColor.white,
-        ),
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: BumditbulTextStyle.bodyMedium1.copyWith(
-            color: BumditbulColor.black600,
-          ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 4,
-            vertical: 0,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(
-              color: BumditbulColor.black600,
-              width: 0.5,
-            ),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(
-              color: BumditbulColor.green400,
-              width: 1,
-            ),
-          ),
-          isDense: true,
-        ),
-        cursorColor: BumditbulColor.green400,
+    return TextField(
+      onChanged: (_) => onChanged(),
+      keyboardType: TextInputType.number,
+      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+      textAlign: TextAlign.center,
+      style: BumditbulTextStyle.bodyMedium1.copyWith(
+        color: BumditbulColor.white,
       ),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: BumditbulTextStyle.bodyMedium1.copyWith(
+          color: BumditbulColor.black600,
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 4,
+          vertical: 12,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(
+            color: BumditbulColor.black600,
+            width: 0.5,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(
+            color: BumditbulColor.green400,
+            width: 1,
+          ),
+        ),
+      ),
+      cursorColor: BumditbulColor.green400,
     );
   }
 }

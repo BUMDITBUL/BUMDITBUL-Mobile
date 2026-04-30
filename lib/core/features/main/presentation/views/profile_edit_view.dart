@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:bumditbul_mobile/constants/color.dart';
 import 'package:bumditbul_mobile/constants/text_style.dart';
 import 'package:bumditbul_mobile/core/components/button/default_button.dart';
@@ -6,6 +8,7 @@ import 'package:bumditbul_mobile/core/features/auth/presentation/providers/auth_
 import 'package:bumditbul_mobile/core/features/auth/presentation/widgets/school_search_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ProfileEditView extends ConsumerStatefulWidget {
   const ProfileEditView({super.key});
@@ -18,6 +21,7 @@ class _ProfileEditViewState extends ConsumerState<ProfileEditView> {
   late final TextEditingController _nicknameCtrl;
   late final TextEditingController _schoolCtrl;
   bool _hasChanges = false;
+  File? _selectedImage;
 
   @override
   void initState() {
@@ -51,6 +55,20 @@ class _ProfileEditViewState extends ConsumerState<ProfileEditView> {
       }
     } else {
       Navigator.of(context).pop();
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
+    );
+    if (picked != null) {
+      setState(() {
+        _selectedImage = File(picked.path);
+        _hasChanges = true;
+      });
     }
   }
 
@@ -159,9 +177,7 @@ class _ProfileEditViewState extends ConsumerState<ProfileEditView> {
                     children: [
                       Center(
                         child: GestureDetector(
-                          onTap: () {
-                            // TODO: image picker
-                          },
+                          onTap: _pickImage,
                           child: Stack(
                             children: [
                               Container(
@@ -175,11 +191,17 @@ class _ProfileEditViewState extends ConsumerState<ProfileEditView> {
                                     width: 1,
                                   ),
                                 ),
-                                child: const Icon(
-                                  Icons.person,
-                                  color: BumditbulColor.black500,
-                                  size: 48,
-                                ),
+                                clipBehavior: Clip.antiAlias,
+                                child: _selectedImage != null
+                                    ? Image.file(
+                                        _selectedImage!,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : const Icon(
+                                        Icons.person,
+                                        color: BumditbulColor.black500,
+                                        size: 48,
+                                      ),
                               ),
                               Positioned(
                                 bottom: 0,
@@ -227,7 +249,7 @@ class _ProfileEditViewState extends ConsumerState<ProfileEditView> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 40),
+                      const SizedBox(height: 100),
                       DefaultButton(
                         onPressed: nicknameIsValid ? _save : null,
                         child: Text(
@@ -237,9 +259,6 @@ class _ProfileEditViewState extends ConsumerState<ProfileEditView> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 24),
-                      const Divider(color: BumditbulColor.black700, height: 1),
-                      const SizedBox(height: 20),
                     ],
                   ),
                 ),

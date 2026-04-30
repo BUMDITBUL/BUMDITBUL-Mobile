@@ -2,14 +2,19 @@ import 'package:bumditbul_mobile/constants/color.dart';
 import 'package:bumditbul_mobile/constants/text_style.dart';
 import 'package:bumditbul_mobile/core/components/button/default_button.dart';
 import 'package:bumditbul_mobile/core/components/button/difficulty_dropdown.dart';
+import 'package:bumditbul_mobile/core/components/dialog/app_dialog.dart';
 import 'package:flutter/material.dart';
 
+int _editEntryIdCounter = 0;
+
 class _EditEntry {
+  final int id;
   final TextEditingController nameCtrl;
   String difficulty;
 
   _EditEntry({String name = '', this.difficulty = '중'})
-    : nameCtrl = TextEditingController(text: name);
+    : id = _editEntryIdCounter++,
+      nameCtrl = TextEditingController(text: name);
 
   void dispose() => nameCtrl.dispose();
 }
@@ -43,86 +48,7 @@ class _SubjectGradeEditViewState extends State<SubjectGradeEditView> {
     super.dispose();
   }
 
-  Future<bool?> _showUnsavedDialog() {
-    return showDialog<bool>(
-      context: context,
-      barrierColor: Colors.black54,
-      builder: (ctx) => Dialog(
-        backgroundColor: BumditbulColor.black850,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.warning_amber_rounded,
-                color: BumditbulColor.green400,
-                size: 40,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                '저장하지 않고 나가시겠어요?',
-                style: BumditbulTextStyle.headline3.copyWith(
-                  color: BumditbulColor.white,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '입력한 내용이 저장되지 않습니다.',
-                textAlign: TextAlign.center,
-                style: BumditbulTextStyle.bodyMedium1.copyWith(
-                  color: BumditbulColor.black400,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.of(ctx).pop(false),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: BumditbulColor.black600),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                      child: Text(
-                        '취소',
-                        style: BumditbulTextStyle.bodyLarge1.copyWith(
-                          color: BumditbulColor.black400,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.of(ctx).pop(true),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: BumditbulColor.green600,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                      child: Text(
-                        '나가기',
-                        style: BumditbulTextStyle.bodyLarge1.copyWith(
-                          color: BumditbulColor.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  Future<bool?> _showUnsavedDialog() => AppDialog.showUnsaved(context);
 
   @override
   Widget build(BuildContext context) {
@@ -227,18 +153,16 @@ class _SubjectGradeEditViewState extends State<SubjectGradeEditView> {
                 child: ListView(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   children: [
-                    ..._entries.asMap().entries.map((e) {
-                      final idx = e.key;
-                      final entry = e.value;
+                    ..._entries.map((entry) {
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 10),
                         child: Dismissible(
-                          key: Key('edit_entry_$idx'),
+                          key: Key('edit_entry_${entry.id}'),
                           direction: DismissDirection.endToStart,
                           onDismissed: (_) {
                             setState(() {
-                              _entries[idx].dispose();
-                              _entries.removeAt(idx);
+                              entry.dispose();
+                              _entries.remove(entry);
                               _hasChanges = true;
                             });
                           },

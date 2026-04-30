@@ -189,7 +189,7 @@ class ProfileView extends ConsumerWidget {
                         width: 140,
                         height: 44,
                         child: ElevatedButton(
-                          onPressed: () => context.go('/main'),
+                          onPressed: () => context.push('/exam-scope'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: BumditbulColor.green600,
                             shape: RoundedRectangleBorder(
