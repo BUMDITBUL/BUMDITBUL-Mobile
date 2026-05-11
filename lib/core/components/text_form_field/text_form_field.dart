@@ -82,10 +82,12 @@ class CustomTextFormField extends StatefulWidget {
   final String? Function(String?)? validator;
 
   @override
-  State<CustomTextFormField> createState() => _CustomTextFormFieldState();
+  State<CustomTextFormField> createState() =>
+      _CustomTextFormFieldState();
 }
 
-class _CustomTextFormFieldState extends State<CustomTextFormField> {
+class _CustomTextFormFieldState
+    extends State<CustomTextFormField> {
   FocusNode? _internalFocusNode;
   bool _isFocused = false;
 
@@ -94,30 +96,45 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
 
   bool get hasLabel =>
       widget.decoration != null &&
-      (widget.decoration!.label != null ||
-          widget.decoration!.labelText != null);
+          (widget.decoration!.label != null ||
+              widget.decoration!.labelText != null);
 
   @override
   void initState() {
     super.initState();
+
     _effectiveFocusNode.addListener(_onFocusChange);
+    widget.controller.addListener(_onTextChange);
   }
 
   void _onFocusChange() {
-    setState(() => _isFocused = _effectiveFocusNode.hasFocus);
+    setState(() {
+      _isFocused = _effectiveFocusNode.hasFocus;
+    });
+  }
+
+  void _onTextChange() {
+    setState(() {});
   }
 
   @override
   void dispose() {
     _effectiveFocusNode.removeListener(_onFocusChange);
+    widget.controller.removeListener(_onTextChange);
+
     _internalFocusNode?.dispose();
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final bool hasText = widget.controller.text.isNotEmpty;
+
     final Color textColor =
-        _isFocused ? BumditbulColor.white : BumditbulColor.black850;
+    (_isFocused || hasText)
+        ? BumditbulColor.white
+        : BumditbulColor.black850;
 
     final defaultTextStyle = BumditbulTextStyle.buttonLarge2
         .copyWith(color: textColor)
@@ -140,13 +157,16 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
       errorText: decoration?.errorText,
       errorStyle: decoration?.errorStyle,
       errorMaxLines: decoration?.errorMaxLines,
-      floatingLabelBehavior: decoration?.floatingLabelBehavior,
-      floatingLabelAlignment: decoration?.floatingLabelAlignment,
+      floatingLabelBehavior:
+      decoration?.floatingLabelBehavior,
+      floatingLabelAlignment:
+      decoration?.floatingLabelAlignment,
       isCollapsed: decoration?.isCollapsed ?? false,
       isDense: decoration?.isDense,
       contentPadding: decoration?.contentPadding,
       prefixIcon: decoration?.prefixIcon,
-      prefixIconConstraints: decoration?.prefixIconConstraints,
+      prefixIconConstraints:
+      decoration?.prefixIconConstraints,
       prefix: decoration?.prefix,
       prefixText: decoration?.prefixText,
       prefixStyle: decoration?.prefixStyle,
@@ -156,7 +176,8 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
       suffixText: decoration?.suffixText,
       suffixStyle: decoration?.suffixStyle,
       suffixIconColor: decoration?.suffixIconColor,
-      suffixIconConstraints: decoration?.suffixIconConstraints,
+      suffixIconConstraints:
+      decoration?.suffixIconConstraints,
       counter: decoration?.counter,
       counterText: decoration?.counterText,
       counterStyle: decoration?.counterStyle,
@@ -165,22 +186,32 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
       focusColor: decoration?.focusColor,
       hoverColor: decoration?.hoverColor,
       errorBorder: decoration?.errorBorder,
-      focusedBorder: decoration?.focusedBorder ??
+      focusedBorder:
+      decoration?.focusedBorder ??
           OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: BumditbulColor.green400),
+            borderRadius:
+            BorderRadius.circular(8),
+            borderSide: const BorderSide(
+              color: BumditbulColor.green400,
+            ),
           ),
-      focusedErrorBorder: decoration?.focusedErrorBorder ??
+      focusedErrorBorder:
+      decoration?.focusedErrorBorder ??
           OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: BumditbulColor.red),
+            borderRadius:
+            BorderRadius.circular(8),
+            borderSide: const BorderSide(
+              color: BumditbulColor.red,
+            ),
           ),
       disabledBorder: decoration?.disabledBorder,
       enabledBorder: decoration?.enabledBorder,
       border: decoration?.border,
       enabled: decoration?.enabled ?? true,
-      semanticCounterText: decoration?.semanticCounterText,
-      alignLabelWithHint: decoration?.alignLabelWithHint,
+      semanticCounterText:
+      decoration?.semanticCounterText,
+      alignLabelWithHint:
+      decoration?.alignLabelWithHint,
       constraints: decoration?.constraints,
     );
 
@@ -191,7 +222,8 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
           CustomTextFormFieldLabel(
             label: widget.decoration!.label,
             labelText: widget.decoration!.labelText,
-            labelStyle: widget.decoration!.labelStyle,
+            labelStyle:
+            widget.decoration!.labelStyle,
           ),
           SizedBox(height: widget.labelSpacing),
         ],
@@ -199,7 +231,6 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
           autocorrect: widget.autocorrect,
           showCursor: widget.showCursor,
           controller: widget.controller,
-          initialValue: widget.initialValue,
           focusNode: _effectiveFocusNode,
           decoration: inputDecoration,
           keyboardType: widget.keyboardType,
@@ -210,18 +241,26 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
           readOnly: widget.readOnly,
           cursorColor: BumditbulColor.green400,
           obscureText: widget.obscureText,
-          maxLines: widget.obscureText ? 1 : widget.maxLines,
+          obscuringCharacter:
+          widget.obscuringCharacter,
+          maxLines:
+          widget.obscureText
+              ? 1
+              : widget.maxLines,
           minLines: widget.minLines,
           expands: widget.expands,
           maxLength: widget.maxLength,
           onChanged: widget.onChanged,
           onTap: widget.onTap,
           onTapOutside: widget.onTapOutside,
-          onEditingComplete: widget.onEditingComplete,
-          onFieldSubmitted: widget.onFieldSubmitted,
+          onEditingComplete:
+          widget.onEditingComplete,
+          onFieldSubmitted:
+          widget.onFieldSubmitted,
           onSaved: widget.onSaved,
           validator: widget.validator,
-          inputFormatters: widget.inputFormatters,
+          inputFormatters:
+          widget.inputFormatters,
         ),
       ],
     );
