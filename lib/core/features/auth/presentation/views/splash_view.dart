@@ -70,24 +70,6 @@ class SplashView extends ConsumerWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 30),
-                      SizedBox(
-                        height: 50,
-                        width: 50,
-                        child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          onPressed: () {},
-                          child: SvgPicture.asset(
-                            'assets/images/apple.svg',
-                            width: 24,
-                            height: 24,
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ],
