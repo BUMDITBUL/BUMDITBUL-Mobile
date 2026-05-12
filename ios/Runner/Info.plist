@@ -70,5 +70,20 @@
 	<string>프로필 사진을 선택하기 위해 사진 라이브러리 접근이 필요합니다.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>프로필 사진을 촬영하기 위해 카메라 접근이 필요합니다.</string>
+	<key>GIDClientID</key>
+	<string>8822461858-95f4en5nkjg39eqi56vahj2bbhcmb22e.apps.googleusercontent.com</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>google</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.8822461858-95f4en5nkjg39eqi56vahj2bbhcmb22e</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
