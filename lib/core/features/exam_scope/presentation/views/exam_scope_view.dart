@@ -68,6 +68,8 @@ class ExamScopeView extends StatefulWidget {
 class _ExamScopeViewState extends State<ExamScopeView> {
   final List<ExamSubjectEntry> _subjects = [];
   bool _hasChanges = false;
+  int _remainingGenerations = 2;
+  static const int _maxGenerations = 2;
 
   @override
   void initState() {
@@ -113,6 +115,85 @@ class _ExamScopeViewState extends State<ExamScopeView> {
   }
 
   Future<bool?> _showUnsavedDialog() => AppDialog.showUnsaved(context);
+
+  Future<bool?> _showSaveConfirmDialog() {
+    return showDialog<bool>(
+      context: context,
+      barrierColor: Colors.black54,
+      builder: (ctx) => Dialog(
+        backgroundColor: BumditbulColor.popUp,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                '시험 범위를 저장하시겠습니까?',
+                textAlign: TextAlign.center,
+                style: BumditbulTextStyle.headline3.copyWith(
+                  color: BumditbulColor.white,
+                ),
+              ),
+              const SizedBox(height: 12),
+              RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(
+                  style: BumditbulTextStyle.bodyMedium1.copyWith(
+                    color: BumditbulColor.black400,
+                  ),
+                  children: [
+                    const TextSpan(text: '저장된 범위를 바탕으로 학습 플랜이 재생성됩니다.\n오늘 재생성 남은 횟수: '),
+                    TextSpan(
+                      text: '$_remainingGenerations/$_maxGenerations회',
+                      style: BumditbulTextStyle.bodyMedium1.copyWith(
+                        color: BumditbulColor.green400,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () => Navigator.of(ctx).pop(true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: BumditbulColor.green600,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                child: Text(
+                  '저장하기',
+                  style: BumditbulTextStyle.bodyLarge1.copyWith(
+                    color: BumditbulColor.white,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              OutlinedButton(
+                onPressed: () => Navigator.of(ctx).pop(false),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: BumditbulColor.black600),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                child: Text(
+                  '취소',
+                  style: BumditbulTextStyle.bodyLarge1.copyWith(
+                    color: BumditbulColor.black400,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -337,21 +418,28 @@ class _ExamScopeViewState extends State<ExamScopeView> {
                     ),
                     const SizedBox(height: 24),
                     DefaultButton(
-                      onPressed: () {
-                        setState(() => _hasChanges = false);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              '시험범위가 저장되었습니다.',
-                              style: BumditbulTextStyle.bodyMedium1,
-                            ),
-                            backgroundColor: BumditbulColor.green600,
-                          ),
-                        );
-                        Navigator.of(context).pop();
-                      },
+                      onPressed: _remainingGenerations > 0
+                          ? () async {
+                              final confirm = await _showSaveConfirmDialog();
+                              if (!(confirm ?? false) || !context.mounted) return;
+                              setState(() {
+                                _hasChanges = false;
+                                _remainingGenerations--;
+                              });
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    '시험범위가 저장되었습니다.',
+                                    style: BumditbulTextStyle.bodyMedium1,
+                                  ),
+                                  backgroundColor: BumditbulColor.green600,
+                                ),
+                              );
+                              Navigator.of(context).pop();
+                            }
+                          : null,
                       child: Text(
-                        '저장',
+                        _remainingGenerations > 0 ? '저장' : '오늘 저장 횟수 초과',
                         style: BumditbulTextStyle.bodyLarge1.copyWith(
                           color: BumditbulColor.white,
                         ),

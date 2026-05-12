@@ -154,23 +154,22 @@ class _SubjectGradeEditViewState extends State<SubjectGradeEditView> {
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   children: [
                     ..._entries.map((entry) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: Dismissible(
-                          key: Key('edit_entry_${entry.id}'),
-                          direction: DismissDirection.endToStart,
-                          onDismissed: (_) {
-                            setState(() {
-                              entry.dispose();
-                              _entries.remove(entry);
-                              _hasChanges = true;
-                            });
-                          },
-                          background: dismissBackground(
-                            margin: EdgeInsets.zero,
-                            borderRadius: 10,
-                          ),
-                          child: Container(
+                      return Dismissible(
+                        key: Key('edit_entry_${entry.id}'),
+                        direction: DismissDirection.endToStart,
+                        onDismissed: (_) {
+                          setState(() {
+                            entry.dispose();
+                            _entries.remove(entry);
+                            _hasChanges = true;
+                          });
+                        },
+                        background: dismissBackground(
+                          margin: const EdgeInsets.only(bottom: 10),
+                          borderRadius: 10,
+                        ),
+                        child: Container(
+                            margin: const EdgeInsets.only(bottom: 10),
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
                               color: BumditbulColor.black850,
@@ -214,8 +213,7 @@ class _SubjectGradeEditViewState extends State<SubjectGradeEditView> {
                               ],
                             ),
                           ),
-                        ),
-                      );
+                        );
                     }),
                     const SizedBox(height: 4),
                     GestureDetector(

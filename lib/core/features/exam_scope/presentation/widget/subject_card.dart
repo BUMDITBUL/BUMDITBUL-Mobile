@@ -220,7 +220,7 @@ class _BorderedField extends StatelessWidget {
         hintStyle: BumditbulTextStyle.bodyMedium1.copyWith(
           color: BumditbulColor.black600,
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(
@@ -264,7 +264,7 @@ class _PageField extends StatelessWidget {
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 4,
-          vertical: 12,
+          vertical: 16,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
