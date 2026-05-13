@@ -55,7 +55,7 @@ class HomeView extends ConsumerWidget {
           SafeArea(
             child: Column(
               children: [
-                _buildHeader(context, authState.user?.nickname),
+                _buildHeader(context, authState.user?.nickname, authState.user?.profileImageUrl),
                 Expanded(
                   child: CustomScrollView(
                     slivers: [
@@ -89,7 +89,7 @@ class HomeView extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context, String? nickname) {
+  Widget _buildHeader(BuildContext context, String? nickname, String? profileImageUrl) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       child: Row(
@@ -120,11 +120,22 @@ class HomeView extends ConsumerWidget {
                       width: 1,
                     ),
                   ),
-                  child: const Icon(
-                    Icons.person_outline,
-                    color: BumditbulColor.black400,
-                    size: 20,
-                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: profileImageUrl != null
+                      ? Image.network(
+                          profileImageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => const Icon(
+                            Icons.person_outline,
+                            color: BumditbulColor.black400,
+                            size: 20,
+                          ),
+                        )
+                      : const Icon(
+                          Icons.person_outline,
+                          color: BumditbulColor.black400,
+                          size: 20,
+                        ),
                 ),
               ],
             ),
