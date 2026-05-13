@@ -89,13 +89,6 @@ class _SubjectGradeEditViewState extends State<SubjectGradeEditView> {
                         color: BumditbulColor.white,
                         size: 22,
                       ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '뒤로가기',
-                        style: BumditbulTextStyle.bodyLarge1.copyWith(
-                          color: BumditbulColor.white,
-                        ),
-                      ),
                     ],
                   ),
                 ),

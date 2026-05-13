@@ -113,33 +113,6 @@ class _ExamDatePickerSheetState extends State<_ExamDatePickerSheet> {
               ),
             ),
             const SizedBox(height: 20),
-            Row(
-              children: [
-                GestureDetector(
-                  onTap: () => Navigator.of(context).pop(),
-                  child: const Icon(
-                    Icons.chevron_left,
-                    color: BumditbulColor.white,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '날짜선택',
-                  style: BumditbulTextStyle.headline3.copyWith(
-                    color: BumditbulColor.white,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '$_selectedYear년 $_selectedMonth월',
-              style: BumditbulTextStyle.bodyMedium1.copyWith(
-                color: BumditbulColor.black400,
-              ),
-            ),
-            const SizedBox(height: 16),
             SizedBox(
               height: _itemExtent * _visibleCount,
               child: Row(
