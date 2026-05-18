@@ -1,5 +1,6 @@
 import 'package:bumditbul_mobile/constants/color.dart';
 import 'package:bumditbul_mobile/constants/text_style.dart';
+import 'package:bumditbul_mobile/core/components/app_snack_bar.dart';
 import 'package:bumditbul_mobile/core/components/button/default_button.dart';
 import 'package:bumditbul_mobile/core/components/button/difficulty_dropdown.dart';
 import 'package:bumditbul_mobile/core/components/dialog/app_dialog.dart';
@@ -306,15 +307,7 @@ class _SubjectGradeEditViewState extends State<SubjectGradeEditView> {
                     DefaultButton(
                       onPressed: () {
                         setState(() => _hasChanges = false);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              '성적이 저장되었습니다.',
-                              style: BumditbulTextStyle.bodyMedium1,
-                            ),
-                            backgroundColor: BumditbulColor.green600,
-                          ),
-                        );
+                        showAppSnackBar(context, '성적이 저장되었습니다.');
                         Navigator.of(context).pop();
                       },
                       child: Text(
