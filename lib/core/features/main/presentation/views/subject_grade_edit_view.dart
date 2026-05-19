@@ -74,6 +74,7 @@ class _SubjectGradeEditViewState extends ConsumerState<SubjectGradeEditView> {
     final subjectsAsync = ref.watch(subjectProvider);
     subjectsAsync.whenOrNull(
       data: (subjects) => _initEntriesIfNeeded(subjects),
+      error: (_, __) => _initEntriesIfNeeded([]),
     );
 
     if (_entries == null) {

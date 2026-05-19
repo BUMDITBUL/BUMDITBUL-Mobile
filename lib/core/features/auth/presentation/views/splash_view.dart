@@ -2,6 +2,7 @@ import 'package:bumditbul_mobile/constants/color.dart';
 import 'package:bumditbul_mobile/constants/text_style.dart';
 import 'package:bumditbul_mobile/core/components/app_snack_bar.dart';
 import 'package:bumditbul_mobile/core/components/button/default_button.dart';
+import 'package:bumditbul_mobile/core/features/schedule/presentation/providers/schedule_providers.dart';
 import 'package:bumditbul_mobile/core/config/google_sign_in_config.dart';
 import 'package:bumditbul_mobile/core/features/auth/presentation/providers/auth_providers.dart';
 import 'package:bumditbul_mobile/core/features/auth/presentation/providers/auth_state_notifier.dart';
@@ -41,6 +42,8 @@ class _SplashViewState extends ConsumerState<SplashView> {
 
     ref.listen<AuthState>(authStateProvider, (_, next) {
       if (next.isAuthenticated && !next.isLoading) {
+        ref.read(dailyPlanProvider.notifier).fetch();
+        ref.read(subjectProvider.notifier).fetch();
         if (next.isNewUser) {
           context.go(AppRoutes.subjectGrade, extra: next.user?.nickname ?? '');
         } else {

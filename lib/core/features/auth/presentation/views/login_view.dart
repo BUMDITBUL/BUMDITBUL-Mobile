@@ -7,6 +7,7 @@ import 'package:bumditbul_mobile/core/components/error_box.dart';
 import 'package:bumditbul_mobile/core/components/text_form_field/text_form_field.dart';
 import 'package:bumditbul_mobile/core/components/text_form_field/text_form_field_label.dart';
 import 'package:bumditbul_mobile/core/features/auth/presentation/providers/auth_providers.dart';
+import 'package:bumditbul_mobile/core/features/schedule/presentation/providers/schedule_providers.dart';
 import 'package:bumditbul_mobile/core/router/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -94,6 +95,8 @@ class _LoginViewState extends ConsumerState<LoginView> {
 
     ref.listen(authStateProvider, (previous, next) {
       if (next.isAuthenticated && !next.isLoading) {
+        ref.read(dailyPlanProvider.notifier).fetch();
+        ref.read(subjectProvider.notifier).fetch();
         context.go(AppRoutes.main);
       }
     });

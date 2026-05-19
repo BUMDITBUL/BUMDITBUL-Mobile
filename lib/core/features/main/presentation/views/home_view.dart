@@ -100,7 +100,7 @@ class HomeView extends ConsumerWidget {
             onTap: () => context.push('/profile'),
             child: Row(
               children: [
-                if (nickname != null) ...[
+                if (nickname != null && nickname.isNotEmpty) ...[
                   Text(
                     nickname,
                     style: BumditbulTextStyle.bodyMedium1.copyWith(

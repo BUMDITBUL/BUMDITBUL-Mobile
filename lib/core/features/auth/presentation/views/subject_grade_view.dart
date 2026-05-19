@@ -2,6 +2,9 @@ import 'package:bumditbul_mobile/constants/color.dart';
 import 'package:bumditbul_mobile/constants/text_style.dart';
 import 'package:bumditbul_mobile/core/components/button/default_button.dart';
 import 'package:bumditbul_mobile/core/components/button/difficulty_dropdown.dart';
+import 'package:bumditbul_mobile/core/features/main/presentation/providers/study_provider.dart';
+import 'package:bumditbul_mobile/core/features/schedule/presentation/providers/schedule_providers.dart';
+import 'package:bumditbul_mobile/core/features/subject/domain/entities/subject_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -82,7 +85,43 @@ class SubjectGradeView extends ConsumerStatefulWidget {
   ConsumerState<SubjectGradeView> createState() => _SubjectGradeViewState();
 }
 
+String _koreanToApi(String korean) => switch (korean) {
+  '상' => 'HIGH',
+  '하' => 'LOW',
+  _ => 'MEDIUM',
+};
+
 class _SubjectGradeViewState extends ConsumerState<SubjectGradeView> {
+  bool _isSaving = false;
+
+  Future<void> _save(List<SubjectEntry> subjects) async {
+    setState(() => _isSaving = true);
+
+    final examDate = ref.read(examDateProvider);
+    final testSchedule = examDate == null
+        ? null
+        : '${examDate.year}-${examDate.month.toString().padLeft(2, '0')}-${examDate.day.toString().padLeft(2, '0')}';
+
+    try {
+      final inputs = subjects
+          .where((s) => s.nameController.text.trim().isNotEmpty)
+          .map((s) => SubjectInput(
+                subjectName: s.nameController.text.trim(),
+                startPage: 1,
+                endPage: 1,
+                difficulty: _koreanToApi(s.difficulty),
+                testSchedule: testSchedule,
+              ))
+          .toList();
+      await ref.read(subjectProvider.notifier).saveOnly(inputs);
+      if (mounted) context.go('/main');
+    } catch (_) {
+      if (mounted) context.go('/main');
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final subjects = ref.watch(subjectEntriesProvider);
@@ -154,13 +193,26 @@ class _SubjectGradeViewState extends ConsumerState<SubjectGradeView> {
               ),
               const SizedBox(height: 20),
               DefaultButton(
-                onPressed: isComplete ? () => context.go('/main') : null,
-                child: Text(
-                  '완료',
-                  style: BumditbulTextStyle.bodyLarge1.copyWith(
-                    color: BumditbulColor.white,
-                  ),
-                ),
+                onPressed: isComplete && !_isSaving
+                    ? () => _save(subjects)
+                    : null,
+                child: _isSaving
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            BumditbulColor.white,
+                          ),
+                        ),
+                      )
+                    : Text(
+                        '완료',
+                        style: BumditbulTextStyle.bodyLarge1.copyWith(
+                          color: BumditbulColor.white,
+                        ),
+                      ),
               ),
               const SizedBox(height: 24),
             ],
@@ -197,7 +249,6 @@ class _SubjectGradeViewState extends ConsumerState<SubjectGradeView> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // 과목명 입력
             Expanded(
               child: TextField(
                 controller: subject.nameController,
@@ -218,7 +269,6 @@ class _SubjectGradeViewState extends ConsumerState<SubjectGradeView> {
               ),
             ),
             const SizedBox(width: 12),
-            // 난이도 드롭다운
             DifficultyDropdown(
               value: subject.difficulty,
               width: 72,
