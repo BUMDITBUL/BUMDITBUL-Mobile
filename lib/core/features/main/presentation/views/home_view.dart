@@ -370,7 +370,7 @@ class HomeView extends ConsumerWidget {
   ) async {
     final picked = await showExamDatePickerSheet(context, initialDate: current);
     if (picked != null) {
-      ref.read(examDateProvider.notifier).state = picked;
+      setExamDateOverride(ref, picked);
     }
   }
 }

@@ -4,9 +4,24 @@ import 'package:bumditbul_mobile/core/components/app_snack_bar.dart';
 import 'package:bumditbul_mobile/core/components/button/default_button.dart';
 import 'package:bumditbul_mobile/core/components/button/difficulty_dropdown.dart';
 import 'package:bumditbul_mobile/core/components/dialog/app_dialog.dart';
+import 'package:bumditbul_mobile/core/features/schedule/presentation/providers/schedule_providers.dart';
+import 'package:bumditbul_mobile/core/features/subject/domain/entities/subject_entity.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 int _editEntryIdCounter = 0;
+
+String _apiToKorean(String api) => switch (api.toUpperCase()) {
+  'HIGH' => '상',
+  'LOW' => '하',
+  _ => '중',
+};
+
+String _koreanToApi(String korean) => switch (korean) {
+  '상' => 'HIGH',
+  '하' => 'LOW',
+  _ => 'MEDIUM',
+};
 
 class _EditEntry {
   final int id;
@@ -20,30 +35,33 @@ class _EditEntry {
   void dispose() => nameCtrl.dispose();
 }
 
-class SubjectGradeEditView extends StatefulWidget {
+class SubjectGradeEditView extends ConsumerStatefulWidget {
   const SubjectGradeEditView({super.key});
 
   @override
-  State<SubjectGradeEditView> createState() => _SubjectGradeEditViewState();
+  ConsumerState<SubjectGradeEditView> createState() =>
+      _SubjectGradeEditViewState();
 }
 
-class _SubjectGradeEditViewState extends State<SubjectGradeEditView> {
-  final List<_EditEntry> _entries = [];
+class _SubjectGradeEditViewState extends ConsumerState<SubjectGradeEditView> {
+  List<_EditEntry>? _entries;
   bool _hasChanges = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _entries.addAll([
-      _EditEntry(name: '수학', difficulty: '중'),
-      _EditEntry(name: '영어', difficulty: '중'),
-      _EditEntry(name: '과학', difficulty: '중'),
-    ]);
+  void _initEntriesIfNeeded(List subjects) {
+    if (_entries != null) return;
+    setState(() {
+      _entries = subjects
+          .map((s) => _EditEntry(
+                name: s.subjectName,
+                difficulty: _apiToKorean(s.difficulty),
+              ))
+          .toList();
+    });
   }
 
   @override
   void dispose() {
-    for (final e in _entries) {
+    for (final e in _entries ?? []) {
       e.dispose();
     }
     super.dispose();
@@ -53,6 +71,21 @@ class _SubjectGradeEditViewState extends State<SubjectGradeEditView> {
 
   @override
   Widget build(BuildContext context) {
+    final subjectsAsync = ref.watch(subjectProvider);
+    subjectsAsync.whenOrNull(
+      data: (subjects) => _initEntriesIfNeeded(subjects),
+    );
+
+    if (_entries == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(color: BumditbulColor.green400),
+        ),
+      );
+    }
+
+    final entries = _entries!;
+
     return PopScope(
       canPop: !_hasChanges,
       onPopInvokedWithResult: (didPop, _) async {
@@ -68,7 +101,6 @@ class _SubjectGradeEditViewState extends State<SubjectGradeEditView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ─ 헤더 ─
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                 child: GestureDetector(
@@ -147,14 +179,14 @@ class _SubjectGradeEditViewState extends State<SubjectGradeEditView> {
                 child: ListView(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   children: [
-                    ..._entries.map((entry) {
+                    ...entries.map((entry) {
                       return Dismissible(
                         key: Key('edit_entry_${entry.id}'),
                         direction: DismissDirection.endToStart,
                         onDismissed: (_) {
                           setState(() {
                             entry.dispose();
-                            _entries.remove(entry);
+                            _entries!.remove(entry);
                             _hasChanges = true;
                           });
                         },
@@ -163,56 +195,56 @@ class _SubjectGradeEditViewState extends State<SubjectGradeEditView> {
                           borderRadius: 10,
                         ),
                         child: Container(
-                            margin: const EdgeInsets.only(bottom: 10),
-                            padding: const EdgeInsets.all(14),
-                            decoration: BoxDecoration(
-                              color: BumditbulColor.black850,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: BumditbulColor.black700,
-                                width: 0.5,
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: TextField(
-                                    controller: entry.nameCtrl,
-                                    onChanged: (_) =>
-                                        setState(() => _hasChanges = true),
-                                    style: BumditbulTextStyle.headline4
-                                        .copyWith(color: BumditbulColor.white),
-                                    decoration: InputDecoration(
-                                      hintText: '과목명',
-                                      hintStyle: BumditbulTextStyle.headline4
-                                          .copyWith(
-                                            color: BumditbulColor.black600,
-                                          ),
-                                      border: InputBorder.none,
-                                      isDense: true,
-                                      contentPadding: EdgeInsets.zero,
-                                    ),
-                                    cursorColor: BumditbulColor.green400,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                DifficultyDropdown(
-                                  value: entry.difficulty,
-                                  width: 72,
-                                  onChanged: (v) => setState(() {
-                                    entry.difficulty = v;
-                                    _hasChanges = true;
-                                  }),
-                                ),
-                              ],
+                          margin: const EdgeInsets.only(bottom: 10),
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: BumditbulColor.black850,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: BumditbulColor.black700,
+                              width: 0.5,
                             ),
                           ),
-                        );
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  controller: entry.nameCtrl,
+                                  onChanged: (_) =>
+                                      setState(() => _hasChanges = true),
+                                  style: BumditbulTextStyle.headline4
+                                      .copyWith(color: BumditbulColor.white),
+                                  decoration: InputDecoration(
+                                    hintText: '과목명',
+                                    hintStyle: BumditbulTextStyle.headline4
+                                        .copyWith(
+                                          color: BumditbulColor.black600,
+                                        ),
+                                    border: InputBorder.none,
+                                    isDense: true,
+                                    contentPadding: EdgeInsets.zero,
+                                  ),
+                                  cursorColor: BumditbulColor.green400,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              DifficultyDropdown(
+                                value: entry.difficulty,
+                                width: 72,
+                                onChanged: (v) => setState(() {
+                                  entry.difficulty = v;
+                                  _hasChanges = true;
+                                }),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
                     }),
                     const SizedBox(height: 4),
                     GestureDetector(
                       onTap: () => setState(() {
-                        _entries.add(_EditEntry());
+                        _entries!.add(_EditEntry());
                         _hasChanges = true;
                       }),
                       child: Container(
@@ -305,17 +337,66 @@ class _SubjectGradeEditViewState extends State<SubjectGradeEditView> {
                     ),
                     const SizedBox(height: 20),
                     DefaultButton(
-                      onPressed: () {
-                        setState(() => _hasChanges = false);
-                        showAppSnackBar(context, '성적이 저장되었습니다.');
-                        Navigator.of(context).pop();
-                      },
-                      child: Text(
-                        '저장',
-                        style: BumditbulTextStyle.bodyLarge1.copyWith(
-                          color: BumditbulColor.white,
-                        ),
-                      ),
+                      onPressed: ref.watch(subjectProvider).isLoading
+                          ? null
+                          : () async {
+                              final existingSubjects =
+                                  ref.read(subjectProvider).valueOrNull ?? [];
+                              final subjectMap = {
+                                for (final s in existingSubjects)
+                                  s.subjectName: s,
+                              };
+                              final fallbackSchedule =
+                                  existingSubjects.firstOrNull?.testSchedule ?? '';
+                              final inputs = entries
+                                  .where((e) => e.nameCtrl.text.trim().isNotEmpty)
+                                  .map((e) {
+                                final name = e.nameCtrl.text.trim();
+                                final matched = subjectMap[name];
+                                return SubjectInput(
+                                  subjectName: name,
+                                  startPage: matched?.startPage ?? 1,
+                                  endPage: matched?.endPage ?? 1,
+                                  difficulty: _koreanToApi(e.difficulty),
+                                  testSchedule:
+                                      matched?.testSchedule ?? fallbackSchedule,
+                                );
+                              }).toList();
+                              try {
+                                await ref
+                                    .read(subjectProvider.notifier)
+                                    .saveAndGenerate(inputs);
+                                if (!context.mounted) return;
+                                setState(() => _hasChanges = false);
+                                showAppSnackBar(context, '성적이 저장되었습니다.');
+                                Navigator.of(context).pop();
+                              } catch (_) {
+                                if (context.mounted) {
+                                  showAppSnackBar(
+                                    context,
+                                    '저장에 실패했습니다.',
+                                    isError: true,
+                                  );
+                                }
+                              }
+                            },
+                      child: ref.watch(subjectProvider).isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  BumditbulColor.white,
+                                ),
+                              ),
+                            )
+                          : Text(
+                              '저장',
+                              style: BumditbulTextStyle.bodyLarge1.copyWith(
+                                color: BumditbulColor.white,
+                              ),
+                            ),
                     ),
                     const SizedBox(height: 24),
                   ],

@@ -1,11 +1,15 @@
 import 'package:bumditbul_mobile/constants/color.dart';
 import 'package:bumditbul_mobile/constants/text_style.dart';
+import 'package:bumditbul_mobile/core/components/app_snack_bar.dart';
 import 'package:bumditbul_mobile/core/components/button/default_button.dart';
 import 'package:bumditbul_mobile/core/components/button/difficulty_dropdown.dart';
 import 'package:bumditbul_mobile/core/components/dialog/app_dialog.dart';
 import 'package:bumditbul_mobile/core/features/exam_scope/presentation/widget/subject_card.dart';
 import 'package:bumditbul_mobile/core/features/main/presentation/widgets/exam_date_picker_sheet.dart';
+import 'package:bumditbul_mobile/core/features/schedule/presentation/providers/schedule_providers.dart';
+import 'package:bumditbul_mobile/core/features/subject/domain/entities/subject_entity.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 enum ExamMaterial { textbook, worksheet, workbook, custom }
 
@@ -30,11 +34,8 @@ class ExamRange {
   String endPage;
   final TextEditingController customCtrl;
 
-  ExamRange({
-    required this.material,
-    this.startPage = '',
-    this.endPage = '',
-  }) : customCtrl = TextEditingController();
+  ExamRange({required this.material, this.startPage = '', this.endPage = ''})
+    : customCtrl = TextEditingController();
 
   void dispose() => customCtrl.dispose();
 }
@@ -46,9 +47,9 @@ class ExamSubjectEntry {
   List<ExamRange> ranges;
 
   ExamSubjectEntry()
-      : nameCtrl = TextEditingController(),
-        difficulty = '중',
-        ranges = [];
+    : nameCtrl = TextEditingController(),
+      difficulty = '중',
+      ranges = [];
 
   void dispose() {
     nameCtrl.dispose();
@@ -58,14 +59,14 @@ class ExamSubjectEntry {
   }
 }
 
-class ExamScopeView extends StatefulWidget {
+class ExamScopeView extends ConsumerStatefulWidget {
   const ExamScopeView({super.key});
 
   @override
-  State<ExamScopeView> createState() => _ExamScopeViewState();
+  ConsumerState<ExamScopeView> createState() => _ExamScopeViewState();
 }
 
-class _ExamScopeViewState extends State<ExamScopeView> {
+class _ExamScopeViewState extends ConsumerState<ExamScopeView> {
   final List<ExamSubjectEntry> _subjects = [];
   bool _hasChanges = false;
   int _remainingGenerations = 2;
@@ -116,10 +117,47 @@ class _ExamScopeViewState extends State<ExamScopeView> {
 
   Future<bool?> _showUnsavedDialog() => AppDialog.showUnsaved(context);
 
+  String _toApiDifficulty(String korean) => switch (korean) {
+    '상' => 'HIGH',
+    '하' => 'LOW',
+    _ => 'MEDIUM',
+  };
+
+  List<SubjectInput> _buildSubjectInputs() {
+    final inputs = <SubjectInput>[];
+    for (final s in _subjects) {
+      final name = s.nameCtrl.text.trim();
+      if (name.isEmpty || s.examDate == null) continue;
+
+      int start = 1;
+      int end = 1;
+      if (s.ranges.isNotEmpty) {
+        final r = s.ranges.first;
+        start = int.tryParse(r.startPage) ?? 1;
+        end = int.tryParse(r.endPage) ?? start;
+      }
+
+      final date = s.examDate!;
+      final testSchedule =
+          '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+
+      inputs.add(
+        SubjectInput(
+          subjectName: name,
+          startPage: start,
+          endPage: end,
+          difficulty: _toApiDifficulty(s.difficulty),
+          testSchedule: testSchedule,
+        ),
+      );
+    }
+    return inputs;
+  }
+
   Future<bool?> _showSaveConfirmDialog() {
     return showDialog<bool>(
       context: context,
-      barrierColor: Colors.black54,
+      barrierColor: BumditbulColor.black900,
       builder: (ctx) => Dialog(
         backgroundColor: BumditbulColor.popUp,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -144,7 +182,9 @@ class _ExamScopeViewState extends State<ExamScopeView> {
                     color: BumditbulColor.black400,
                   ),
                   children: [
-                    const TextSpan(text: '저장된 범위를 바탕으로 학습 플랜이 재생성됩니다.\n오늘 재생성 남은 횟수: '),
+                    const TextSpan(
+                      text: '저장된 범위를 바탕으로 학습 플랜이 재생성됩니다.\n오늘 재생성 남은 횟수: ',
+                    ),
                     TextSpan(
                       text: '$_remainingGenerations/$_maxGenerations회',
                       style: BumditbulTextStyle.bodyMedium1.copyWith(
@@ -228,14 +268,10 @@ class _ExamScopeViewState extends State<ExamScopeView> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.chevron_left,
-                          color: BumditbulColor.white, size: 22),
-                      const SizedBox(width: 4),
-                      Text(
-                        '뒤로가기',
-                        style: BumditbulTextStyle.bodyLarge1.copyWith(
-                          color: BumditbulColor.white,
-                        ),
+                      const Icon(
+                        Icons.chevron_left,
+                        color: BumditbulColor.white,
+                        size: 22,
                       ),
                     ],
                   ),
@@ -295,37 +331,36 @@ class _ExamScopeViewState extends State<ExamScopeView> {
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   children: [
                     ..._subjects.asMap().entries.map(
-                          (e) => Dismissible(
-                            key: Key('exam_subject_${e.key}_${e.value.hashCode}'),
-                            direction: DismissDirection.endToStart,
-                            onDismissed: (_) => _removeSubject(e.key),
-                            background: dismissBackground(
-                              margin: const EdgeInsets.only(bottom: 12),
-                              borderRadius: 12,
-                            ),
-                            child: SubjectCard(
-                              entry: e.value,
-                              index: e.key,
-                              onRemove: () => _removeSubject(e.key),
-                              onToggleMaterial: (mat) =>
-                                  _toggleMaterial(e.key, mat),
-                              onChanged: () =>
-                                  setState(() => _hasChanges = true),
-                              onDatePick: () async {
-                                final picked = await showExamDatePickerSheet(
-                                  context,
-                                  initialDate: e.value.examDate,
-                                );
-                                if (picked != null) {
-                                  setState(() {
-                                    _subjects[e.key].examDate = picked;
-                                    _hasChanges = true;
-                                  });
-                                }
-                              },
-                            ),
-                          ),
+                      (e) => Dismissible(
+                        key: Key('exam_subject_${e.key}_${e.value.hashCode}'),
+                        direction: DismissDirection.endToStart,
+                        onDismissed: (_) => _removeSubject(e.key),
+                        background: dismissBackground(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          borderRadius: 12,
                         ),
+                        child: SubjectCard(
+                          entry: e.value,
+                          index: e.key,
+                          onRemove: () => _removeSubject(e.key),
+                          onToggleMaterial: (mat) =>
+                              _toggleMaterial(e.key, mat),
+                          onChanged: () => setState(() => _hasChanges = true),
+                          onDatePick: () async {
+                            final picked = await showExamDatePickerSheet(
+                              context,
+                              initialDate: e.value.examDate,
+                            );
+                            if (picked != null) {
+                              setState(() {
+                                _subjects[e.key].examDate = picked;
+                                _hasChanges = true;
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     GestureDetector(
                       onTap: _addSubject,
@@ -333,8 +368,7 @@ class _ExamScopeViewState extends State<ExamScopeView> {
                         alignment: Alignment.center,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         decoration: BoxDecoration(
-                          border:
-                              Border.all(color: BumditbulColor.black700),
+                          border: Border.all(color: BumditbulColor.black700),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
@@ -371,8 +405,11 @@ class _ExamScopeViewState extends State<ExamScopeView> {
                         children: [
                           Row(
                             children: [
-                              const Icon(Icons.info_outline,
-                                  color: BumditbulColor.green400, size: 16),
+                              const Icon(
+                                Icons.info_outline,
+                                color: BumditbulColor.green400,
+                                size: 16,
+                              ),
                               const SizedBox(width: 6),
                               Text(
                                 '알림 사항',
@@ -397,16 +434,16 @@ class _ExamScopeViewState extends State<ExamScopeView> {
                                     '• ',
                                     style: BumditbulTextStyle.bodyMedium2
                                         .copyWith(
-                                      color: BumditbulColor.black400,
-                                    ),
+                                          color: BumditbulColor.black400,
+                                        ),
                                   ),
                                   Expanded(
                                     child: Text(
                                       t,
                                       style: BumditbulTextStyle.bodyMedium2
                                           .copyWith(
-                                        color: BumditbulColor.black400,
-                                      ),
+                                            color: BumditbulColor.black400,
+                                          ),
                                     ),
                                   ),
                                 ],
@@ -421,25 +458,48 @@ class _ExamScopeViewState extends State<ExamScopeView> {
                       onPressed: _remainingGenerations > 0
                           ? () async {
                               final confirm = await _showSaveConfirmDialog();
-                              if (!(confirm ?? false) || !context.mounted) return;
-                              setState(() {
-                                _hasChanges = false;
-                                _remainingGenerations--;
-                              });
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    '시험범위가 저장되었습니다.',
-                                    style: BumditbulTextStyle.bodyMedium1,
-                                  ),
-                                  backgroundColor: BumditbulColor.green600,
-                                ),
-                              );
-                              Navigator.of(context).pop();
+                              if (!(confirm ?? false) || !context.mounted)
+                                return;
+
+                              final inputs = _buildSubjectInputs();
+                              if (inputs.isEmpty) {
+                                showAppSnackBar(
+                                  context,
+                                  '과목명과 시험 날짜를 입력해주세요.',
+                                  isError: true,
+                                );
+                                return;
+                              }
+
+                              try {
+                                await ref
+                                    .read(subjectProvider.notifier)
+                                    .saveAndGenerate(inputs);
+                                if (!context.mounted) return;
+                                setState(() {
+                                  _hasChanges = false;
+                                  _remainingGenerations--;
+                                });
+                                ref.read(dailyPlanProvider.notifier).fetch();
+                                showAppSnackBar(
+                                  context,
+                                  '시험범위가 저장되고 일정이 생성되었습니다.',
+                                );
+                                Navigator.of(context).pop();
+                              } catch (e) {
+                                if (!context.mounted) return;
+                                showAppSnackBar(
+                                  context,
+                                  e.toString(),
+                                  isError: true,
+                                );
+                              }
                             }
                           : null,
                       child: Text(
-                        _remainingGenerations > 0 ? '저장' : '오늘 저장 횟수 초과',
+                        _remainingGenerations > 0
+                            ? '저장 및 일정 생성'
+                            : '오늘 저장 횟수 초과',
                         style: BumditbulTextStyle.bodyLarge1.copyWith(
                           color: BumditbulColor.white,
                         ),
