@@ -2,10 +2,12 @@ import 'dart:io';
 
 import 'package:bumditbul_mobile/constants/color.dart';
 import 'package:bumditbul_mobile/constants/text_style.dart';
+import 'package:bumditbul_mobile/core/components/app_snack_bar.dart';
 import 'package:bumditbul_mobile/core/components/button/default_button.dart';
 import 'package:bumditbul_mobile/core/components/dialog/app_dialog.dart';
 import 'package:bumditbul_mobile/core/features/auth/presentation/providers/auth_providers.dart';
 import 'package:bumditbul_mobile/core/features/auth/presentation/widgets/school_search_sheet.dart';
+import 'package:bumditbul_mobile/core/features/main/presentation/providers/study_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -64,48 +66,62 @@ class _ProfileEditViewState extends ConsumerState<ProfileEditView> {
       source: ImageSource.gallery,
       imageQuality: 80,
     );
-    if (picked != null) {
-      setState(() {
-        _selectedImage = File(picked.path);
-        _hasChanges = true;
-      });
+    if (picked == null) return;
+
+    final file = File(picked.path);
+    setState(() {
+      _selectedImage = file;
+      _hasChanges = true;
+    });
+
+    try {
+      await ref.read(authStateProvider.notifier).uploadProfileImage(file);
+    } catch (_) {
+      if (mounted) {
+        showAppSnackBar(context, '이미지 업로드에 실패했습니다.', isError: true);
+      }
     }
   }
 
   Future<void> _pickSchool() async {
     final result = await showSchoolSearchSheet(context);
     if (result != null) {
-      _schoolCtrl.text = result;
+      _schoolCtrl.text = result.name;
+      if (result.nearestExamDate != null) {
+        setExamDateOverride(ref, result.nearestExamDate!);
+      }
       setState(() => _hasChanges = true);
     }
   }
 
-  void _save() {
+  Future<void> _save() async {
     final nickname = _nicknameCtrl.text.trim();
     if (nickname.isEmpty) return;
 
-    ref
-        .read(authStateProvider.notifier)
-        .updateProfile(
-          nickname: nickname,
-          school: _schoolCtrl.text.trim().isNotEmpty
-              ? _schoolCtrl.text.trim()
-              : null,
-        );
-
-    setState(() => _hasChanges = false);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('프로필이 저장되었습니다.', style: BumditbulTextStyle.bodyMedium1),
-        backgroundColor: BumditbulColor.green600,
-      ),
-    );
-    Navigator.of(context).pop();
+    try {
+      await ref
+          .read(authStateProvider.notifier)
+          .updateProfile(
+            nickname: nickname,
+            school: _schoolCtrl.text.trim().isNotEmpty
+                ? _schoolCtrl.text.trim()
+                : null,
+          );
+      if (!mounted) return;
+      setState(() => _hasChanges = false);
+      showAppSnackBar(context, '프로필이 저장되었습니다.');
+      Navigator.of(context).pop();
+    } catch (_) {
+      if (mounted) {
+        showAppSnackBar(context, '저장에 실패했습니다.', isError: true);
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final nicknameIsValid = _nicknameCtrl.text.trim().isNotEmpty;
+    final profileImageUrl = ref.watch(authStateProvider).user?.profileImageUrl;
 
     return PopScope(
       canPop: !_hasChanges,
@@ -134,13 +150,6 @@ class _ProfileEditViewState extends ConsumerState<ProfileEditView> {
                         color: BumditbulColor.white,
                         size: 22,
                       ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '뒤로가기',
-                        style: BumditbulTextStyle.bodyLarge1.copyWith(
-                          color: BumditbulColor.white,
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -160,7 +169,7 @@ class _ProfileEditViewState extends ConsumerState<ProfileEditView> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      '닉네임과 학교명을 변경할 수 있어요.',
+                      '닉네임과 프로필 사진, 학교명을 변경할 수 있어요.',
                       style: BumditbulTextStyle.bodyMedium1.copyWith(
                         color: BumditbulColor.black400,
                       ),
@@ -197,6 +206,11 @@ class _ProfileEditViewState extends ConsumerState<ProfileEditView> {
                                         _selectedImage!,
                                         fit: BoxFit.cover,
                                       )
+                                    : profileImageUrl != null
+                                    ? Image.network(
+                                        profileImageUrl,
+                                        fit: BoxFit.cover,
+                                      )
                                     : const Icon(
                                         Icons.person,
                                         color: BumditbulColor.black500,
@@ -219,7 +233,7 @@ class _ProfileEditViewState extends ConsumerState<ProfileEditView> {
                                   ),
                                   child: const Icon(
                                     Icons.camera_alt_outlined,
-                                    color: Colors.white,
+                                    color: BumditbulColor.white,
                                     size: 14,
                                   ),
                                 ),
@@ -233,7 +247,7 @@ class _ProfileEditViewState extends ConsumerState<ProfileEditView> {
                       const SizedBox(height: 8),
                       _InputField(
                         controller: _nicknameCtrl,
-                        hintText: '닉네임을 입력해주세요.',
+                        hintText: '닉네임은 2~5자의 한글만 가능합니다.',
                         onChanged: (_) => setState(() {}),
                       ),
                       const SizedBox(height: 20),
