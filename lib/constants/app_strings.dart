@@ -11,7 +11,7 @@ abstract final class AppStrings {
   static const String hintEmail = '이메일을 입력해주세요.';
   static const String hintPassword = '8자 이상 특수문자를 포함하여 입력해주세요.';
   static const String hintCode = '인증번호 6자리 입력해주세요.';
-  static const String hintNickname = '닉네임을 입력해주세요.';
+  static const String hintNickname = '닉네임은 2~5자의 한글만 가능합니다.';
   static const String hintSchool = '학교명을 검색해주세요.';
   static const String hintSchoolOptional = '학교명을 검색해주세요. (선택)';
 

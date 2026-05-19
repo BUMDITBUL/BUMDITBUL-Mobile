@@ -234,7 +234,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
                   child: CustomTextFormField(
                     controller: _emailCtrl,
                     keyboardType: TextInputType.emailAddress,
-                    readOnly: _codeSent && !_codeVerified == false, // 발송 후 수정 방지
+                    readOnly: _codeSent && !_codeVerified == false,
                     decoration:
                         _fieldDecoration(hintText: AppStrings.hintEmail),
                     validator: (v) {
