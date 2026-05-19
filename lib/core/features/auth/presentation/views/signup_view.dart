@@ -4,11 +4,15 @@ import 'package:bumditbul_mobile/constants/app_dimens.dart';
 import 'package:bumditbul_mobile/constants/app_strings.dart';
 import 'package:bumditbul_mobile/constants/color.dart';
 import 'package:bumditbul_mobile/constants/text_style.dart';
+import 'package:bumditbul_mobile/core/components/app_snack_bar.dart';
 import 'package:bumditbul_mobile/core/components/button/default_button.dart';
 import 'package:bumditbul_mobile/core/components/text_form_field/text_form_field.dart';
 import 'package:bumditbul_mobile/core/components/text_form_field/text_form_field_label.dart';
 import 'package:bumditbul_mobile/core/features/auth/presentation/providers/auth_providers.dart';
+import 'package:bumditbul_mobile/core/features/auth/presentation/providers/auth_state_notifier.dart';
+import 'package:bumditbul_mobile/core/components/error_box.dart';
 import 'package:bumditbul_mobile/core/features/auth/presentation/widgets/school_search_sheet.dart';
+import 'package:bumditbul_mobile/core/features/main/presentation/providers/study_provider.dart';
 import 'package:bumditbul_mobile/core/router/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,19 +28,20 @@ class SignupView extends ConsumerStatefulWidget {
 class _SignupViewState extends ConsumerState<SignupView> {
   int _step = 1;
 
-  late TextEditingController _emailController;
-  late TextEditingController _verificationCodeController;
-  late TextEditingController _passwordController;
-  late TextEditingController _passwordConfirmController;
-  late GlobalKey<FormState> _step1FormKey;
+  late final TextEditingController _emailCtrl;
+  late final TextEditingController _codeCtrl;
+  late final TextEditingController _passwordCtrl;
+  late final TextEditingController _passwordConfirmCtrl;
+  final GlobalKey<FormState> _step1FormKey = GlobalKey();
 
-  late TextEditingController _nicknameController;
-  late TextEditingController _schoolController;
-  late GlobalKey<FormState> _step2FormKey;
+  late final TextEditingController _nicknameCtrl;
+  late final TextEditingController _schoolCtrl;
+  final GlobalKey<FormState> _step2FormKey = GlobalKey();
 
-  Timer? _timer;
+  bool _codeSent = false;
+  bool _codeVerified = false;
   int _remainingSeconds = 180;
-  bool _isCodeSent = false;
+  Timer? _timer;
 
   bool _obscurePassword = true;
   bool _obscurePasswordConfirm = true;
@@ -44,57 +49,45 @@ class _SignupViewState extends ConsumerState<SignupView> {
   @override
   void initState() {
     super.initState();
-    _emailController = TextEditingController();
-    _verificationCodeController = TextEditingController();
-    _passwordController = TextEditingController();
-    _passwordConfirmController = TextEditingController();
-    _nicknameController = TextEditingController();
-    _schoolController = TextEditingController();
-    _step1FormKey = GlobalKey<FormState>();
-    _step2FormKey = GlobalKey<FormState>();
-
-    _emailController.addListener(_onFieldChanged);
-    _verificationCodeController.addListener(_onFieldChanged);
-    _passwordController.addListener(_onFieldChanged);
-    _passwordConfirmController.addListener(_onFieldChanged);
-    _nicknameController.addListener(_onFieldChanged);
-    _schoolController.addListener(_onFieldChanged);
+    _emailCtrl = TextEditingController()..addListener(_rebuild);
+    _codeCtrl = TextEditingController()..addListener(_rebuild);
+    _passwordCtrl = TextEditingController()..addListener(_rebuild);
+    _passwordConfirmCtrl = TextEditingController()..addListener(_rebuild);
+    _nicknameCtrl = TextEditingController()..addListener(_rebuild);
+    _schoolCtrl = TextEditingController()..addListener(_rebuild);
   }
 
-  void _onFieldChanged() => setState(() {});
+  void _rebuild() => setState(() {});
 
   @override
   void dispose() {
     _timer?.cancel();
-    _emailController.dispose();
-    _verificationCodeController.dispose();
-    _passwordController.dispose();
-    _passwordConfirmController.dispose();
-    _nicknameController.dispose();
-    _schoolController.dispose();
+    for (final c in [
+      _emailCtrl,
+      _codeCtrl,
+      _passwordCtrl,
+      _passwordConfirmCtrl,
+      _nicknameCtrl,
+      _schoolCtrl,
+    ]) {
+      c.dispose();
+    }
     super.dispose();
   }
 
   bool get _isStep1Valid =>
-      _emailController.text.isNotEmpty &&
-      _verificationCodeController.text.isNotEmpty &&
-      _passwordController.text.isNotEmpty &&
-      _passwordConfirmController.text.isNotEmpty;
+      _codeVerified &&
+      _passwordCtrl.text.isNotEmpty &&
+      _passwordConfirmCtrl.text.isNotEmpty;
 
-  bool get _isStep2Valid => _nicknameController.text.isNotEmpty;
+  bool get _isStep2Valid => _nicknameCtrl.text.trim().isNotEmpty;
 
-  void _sendVerificationCode() {
-    if (_emailController.text.isEmpty || !_emailController.text.contains('@')) {
-      return;
-    }
-    setState(() {
-      _isCodeSent = true;
-      _remainingSeconds = 180;
-    });
+  void _startTimer() {
     _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    _remainingSeconds = 180;
+    _timer = Timer.periodic(const Duration(seconds: 1), (t) {
       if (_remainingSeconds <= 0) {
-        timer.cancel();
+        t.cancel();
       } else {
         setState(() => _remainingSeconds--);
       }
@@ -102,74 +95,73 @@ class _SignupViewState extends ConsumerState<SignupView> {
   }
 
   String get _timerText {
-    final minutes = _remainingSeconds ~/ 60;
-    final seconds = _remainingSeconds % 60;
-    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    final m = _remainingSeconds ~/ 60;
+    final s = _remainingSeconds % 60;
+    return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
   }
 
-  String? _validateEmail(String? value) {
-    if (value == null || value.isEmpty) return AppStrings.errEmailEmpty;
-    if (!value.contains('@')) return AppStrings.errEmailInvalid;
-    return null;
-  }
+  Future<void> _sendCode() async {
+    final email = _emailCtrl.text.trim();
+    if (!email.contains('@')) return;
 
-  String? _validateCode(String? value) {
-    if (value == null || value.isEmpty) return AppStrings.errCodeEmpty;
-    if (value.length < 6) return AppStrings.errCodeInvalid;
-    return null;
-  }
+    final isDuplicate = await ref
+        .read(authStateProvider.notifier)
+        .sendVerificationEmail(email: email);
 
-  String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty) return AppStrings.errPasswordEmpty;
-    if (value.length < 8 ||
-        !value.contains(RegExp(r'[!@#\$%^&*(),.?":{}|<>]'))) {
-      return AppStrings.errPasswordInvalid;
+    if (!mounted) return;
+    if (isDuplicate) {
+      _showSnack('이미 가입된 이메일입니다.', isError: true);
+      return;
     }
-    return null;
+    setState(() {
+      _codeSent = true;
+      _codeVerified = false;
+    });
+    _startTimer();
+    _showSnack('인증번호가 발송되었습니다.');
   }
 
-  String? _validatePasswordConfirm(String? value) {
-    if (value == null || value.isEmpty) return AppStrings.errPasswordConfirmEmpty;
-    if (value != _passwordController.text) return AppStrings.errPasswordMismatch;
-    return null;
+  Future<void> _verifyCode() async {
+    final verified = await ref
+        .read(authStateProvider.notifier)
+        .verifyEmailCode(
+          email: _emailCtrl.text.trim(),
+          code: _codeCtrl.text.trim(),
+        );
+    if (mounted && verified) {
+      setState(() => _codeVerified = true);
+      _timer?.cancel();
+      _showSnack('인증이 완료되었습니다.');
+    }
   }
 
-  String? _validateNickname(String? value) {
-    if (value == null || value.isEmpty) return AppStrings.errNicknameEmpty;
-    return null;
-  }
-
-  String? _validateSchoolName(String? value) {
-    if (value == null || value.isEmpty) return AppStrings.errSchoolEmpty;
-    return null;
-  }
-
-  InputDecoration _fieldDecoration({
-    required String hintText,
-    Widget? suffix,
-    BoxConstraints? suffixConstraints,
-  }) {
+  InputDecoration _fieldDecoration({required String hintText, Widget? suffix, BoxConstraints? suffixConstraints}) {
     return InputDecoration(
       hintText: hintText,
-      hintStyle: BumditbulTextStyle.buttonMedium
-          .copyWith(color: BumditbulColor.black700),
+      hintStyle:
+          BumditbulTextStyle.buttonMedium.copyWith(color: BumditbulColor.black700),
       suffixIcon: suffix,
       suffixIconConstraints: suffixConstraints,
       border: OutlineInputBorder(
-          borderRadius: AppDimens.roundedS,
-          borderSide: const BorderSide(color: BumditbulColor.black600)),
+        borderRadius: AppDimens.roundedS,
+        borderSide: const BorderSide(color: BumditbulColor.black600),
+      ),
       enabledBorder: OutlineInputBorder(
-          borderRadius: AppDimens.roundedS,
-          borderSide: const BorderSide(color: BumditbulColor.black600)),
+        borderRadius: AppDimens.roundedS,
+        borderSide: const BorderSide(color: BumditbulColor.black600),
+      ),
       focusedBorder: OutlineInputBorder(
-          borderRadius: AppDimens.roundedS,
-          borderSide: const BorderSide(color: BumditbulColor.green400)),
+        borderRadius: AppDimens.roundedS,
+        borderSide: const BorderSide(color: BumditbulColor.green400),
+      ),
       errorBorder: OutlineInputBorder(
-          borderRadius: AppDimens.roundedS,
-          borderSide: const BorderSide(color: BumditbulColor.red)),
+        borderRadius: AppDimens.roundedS,
+        borderSide: const BorderSide(color: BumditbulColor.red),
+      ),
       focusedErrorBorder: OutlineInputBorder(
-          borderRadius: AppDimens.roundedS,
-          borderSide: const BorderSide(color: BumditbulColor.red)),
+        borderRadius: AppDimens.roundedS,
+        borderSide: const BorderSide(color: BumditbulColor.red),
+      ),
     );
   }
 
@@ -177,11 +169,9 @@ class _SignupViewState extends ConsumerState<SignupView> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authStateProvider);
 
-    ref.listen(authStateProvider, (previous, next) {
+    ref.listen<AuthState>(authStateProvider, (_, next) {
       if (next.isAuthenticated && !next.isLoading) {
-        if (context.mounted) {
-          context.go(AppRoutes.subjectGrade, extra: _nicknameController.text);
-        }
+        context.go(AppRoutes.subjectGrade, extra: _nicknameCtrl.text.trim());
       }
     });
 
@@ -201,8 +191,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
                     context.go(AppRoutes.splash);
                   }
                 },
-                icon: const Icon(Icons.arrow_back_ios,
-                    color: BumditbulColor.white),
+                icon: const Icon(Icons.arrow_back_ios, color: BumditbulColor.white),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
               ),
@@ -216,7 +205,8 @@ class _SignupViewState extends ConsumerState<SignupView> {
               ),
               AppDimens.gap40,
               Expanded(
-                child: _step == 1 ? _buildStep1() : _buildStep2(authState),
+                child:
+                    _step == 1 ? _buildStep1(authState) : _buildStep2(authState),
               ),
               AppDimens.gap20,
               _buildBottomButton(authState),
@@ -228,7 +218,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
     );
   }
 
-  Widget _buildStep1() {
+  Widget _buildStep1(AuthState authState) {
     return SingleChildScrollView(
       child: Form(
         key: _step1FormKey,
@@ -242,10 +232,16 @@ class _SignupViewState extends ConsumerState<SignupView> {
               children: [
                 Expanded(
                   child: CustomTextFormField(
-                    controller: _emailController,
+                    controller: _emailCtrl,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: _fieldDecoration(hintText: AppStrings.hintEmail),
-                    validator: _validateEmail,
+                    readOnly: _codeSent && !_codeVerified == false, // 발송 후 수정 방지
+                    decoration:
+                        _fieldDecoration(hintText: AppStrings.hintEmail),
+                    validator: (v) {
+                      if (v == null || v.isEmpty) return AppStrings.errEmailEmpty;
+                      if (!v.contains('@')) return AppStrings.errEmailInvalid;
+                      return null;
+                    },
                   ),
                 ),
                 AppDimens.gapH10,
@@ -253,20 +249,19 @@ class _SignupViewState extends ConsumerState<SignupView> {
                   width: 80,
                   height: 43,
                   child: ElevatedButton(
-                    onPressed: _emailController.text.isNotEmpty
-                        ? _sendVerificationCode
+                    onPressed: _emailCtrl.text.isNotEmpty && !_codeVerified
+                        ? _sendCode
                         : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _emailController.text.isNotEmpty
-                          ? BumditbulColor.green600
-                          : BumditbulColor.black600,
+                      backgroundColor: BumditbulColor.green600,
                       disabledBackgroundColor: BumditbulColor.black600,
                       shape: RoundedRectangleBorder(
-                          borderRadius: AppDimens.roundedS),
+                        borderRadius: AppDimens.roundedS,
+                      ),
                       padding: EdgeInsets.zero,
                     ),
                     child: Text(
-                      AppStrings.labelCode,
+                      _codeSent ? '재발송' : '인증',
                       style: BumditbulTextStyle.bodyMedium1
                           .copyWith(color: BumditbulColor.white),
                     ),
@@ -274,38 +269,72 @@ class _SignupViewState extends ConsumerState<SignupView> {
                 ),
               ],
             ),
-            AppDimens.gap20,
-            CustomTextFormFieldLabel(labelText: AppStrings.labelCode),
-            AppDimens.gap10,
-            CustomTextFormField(
-              controller: _verificationCodeController,
-              keyboardType: TextInputType.number,
-              readOnly: !_isCodeSent,
-              decoration: _fieldDecoration(
-                hintText: AppStrings.hintCode,
-                suffix: _isCodeSent
-                    ? Padding(
-                        padding: const EdgeInsets.only(right: 12),
-                        child: Text(
-                          _timerText,
-                          style: BumditbulTextStyle.bodyMedium1.copyWith(
-                            color: BumditbulColor.black400,
+            if (_codeSent) ...[
+              AppDimens.gap20,
+              CustomTextFormFieldLabel(labelText: AppStrings.labelCode),
+              AppDimens.gap10,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: CustomTextFormField(
+                      controller: _codeCtrl,
+                      keyboardType: TextInputType.number,
+                      readOnly: _codeVerified,
+                      decoration: _fieldDecoration(
+                        hintText: AppStrings.hintCode,
+                        suffix: _codeVerified
+                            ? const Padding(
+                                padding: EdgeInsets.only(right: 12),
+                                child: Icon(Icons.check_circle,
+                                    color: BumditbulColor.green400, size: 20),
+                              )
+                            : Padding(
+                                padding: const EdgeInsets.only(right: 12),
+                                child: Text(
+                                  _timerText,
+                                  style: BumditbulTextStyle.bodyMedium1.copyWith(
+                                    color: BumditbulColor.black400,
+                                  ),
+                                ),
+                              ),
+                        suffixConstraints:
+                            const BoxConstraints(minHeight: 0, minWidth: 60),
+                      ),
+                    ),
+                  ),
+                  if (!_codeVerified) ...[
+                    AppDimens.gapH10,
+                    SizedBox(
+                      width: 80,
+                      height: 43,
+                      child: ElevatedButton(
+                        onPressed:
+                            _codeCtrl.text.isNotEmpty ? _verifyCode : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: BumditbulColor.green600,
+                          disabledBackgroundColor: BumditbulColor.black600,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: AppDimens.roundedS,
                           ),
+                          padding: EdgeInsets.zero,
                         ),
-                      )
-                    : null,
-                suffixConstraints: const BoxConstraints(
-                  minHeight: 0,
-                  minWidth: 60,
-                ),
+                        child: Text(
+                          '확인',
+                          style: BumditbulTextStyle.bodyMedium1
+                              .copyWith(color: BumditbulColor.white),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
-              validator: _isCodeSent ? _validateCode : null,
-            ),
+            ],
             AppDimens.gap20,
             CustomTextFormFieldLabel(labelText: AppStrings.labelPassword),
             AppDimens.gap10,
             CustomTextFormField(
-              controller: _passwordController,
+              controller: _passwordCtrl,
               obscureText: _obscurePassword,
               decoration: _fieldDecoration(
                 hintText: AppStrings.hintPassword,
@@ -321,14 +350,20 @@ class _SignupViewState extends ConsumerState<SignupView> {
                       setState(() => _obscurePassword = !_obscurePassword),
                 ),
               ),
-              validator: _validatePassword,
+              validator: (v) {
+                if (v == null || v.isEmpty) return AppStrings.errPasswordEmpty;
+                if (v.length < 8 ||
+                    !v.contains(RegExp(r'[!@#\$%^&*(),.?":{}|<>]'))) {
+                  return AppStrings.errPasswordInvalid;
+                }
+                return null;
+              },
             ),
             AppDimens.gap20,
-            CustomTextFormFieldLabel(
-                labelText: AppStrings.labelPasswordConfirm),
+            CustomTextFormFieldLabel(labelText: AppStrings.labelPasswordConfirm),
             AppDimens.gap10,
             CustomTextFormField(
-              controller: _passwordConfirmController,
+              controller: _passwordConfirmCtrl,
               obscureText: _obscurePasswordConfirm,
               decoration: _fieldDecoration(
                 hintText: AppStrings.hintPassword,
@@ -340,19 +375,29 @@ class _SignupViewState extends ConsumerState<SignupView> {
                     color: BumditbulColor.black400,
                     size: 20,
                   ),
-                  onPressed: () => setState(() =>
-                      _obscurePasswordConfirm = !_obscurePasswordConfirm),
+                  onPressed: () => setState(
+                      () => _obscurePasswordConfirm = !_obscurePasswordConfirm),
                 ),
               ),
-              validator: _validatePasswordConfirm,
+              validator: (v) {
+                if (v == null || v.isEmpty) {
+                  return AppStrings.errPasswordConfirmEmpty;
+                }
+                if (v != _passwordCtrl.text) return AppStrings.errPasswordMismatch;
+                return null;
+              },
             ),
+            if (authState.error != null && _step == 1) ...[
+              AppDimens.gap16,
+              ErrorBox(message: authState.error!),
+            ],
           ],
         ),
       ),
     );
   }
 
-  Widget _buildStep2(dynamic authState) {
+  Widget _buildStep2(AuthState authState) {
     return SingleChildScrollView(
       child: Form(
         key: _step2FormKey,
@@ -362,15 +407,14 @@ class _SignupViewState extends ConsumerState<SignupView> {
             CustomTextFormFieldLabel(labelText: AppStrings.labelNickname),
             AppDimens.gap10,
             CustomTextFormField(
-              controller: _nicknameController,
-              decoration: _fieldDecoration(hintText: AppStrings.hintNickname),
-              validator: _validateNickname,
+              controller: _nicknameCtrl,
+              decoration:
+                  _fieldDecoration(hintText: AppStrings.hintNickname),
               maxLength: 8,
+              validator: (v) => (v == null || v.trim().isEmpty)
+                  ? AppStrings.errNicknameEmpty
+                  : null,
             ),
-            if (authState.error != null) ...[
-              AppDimens.gap16,
-              _ErrorBox(message: authState.error!),
-            ],
             AppDimens.gap20,
             CustomTextFormFieldLabel(labelText: AppStrings.labelSchool),
             AppDimens.gap10,
@@ -379,13 +423,16 @@ class _SignupViewState extends ConsumerState<SignupView> {
                 FocusScope.of(context).unfocus();
                 final selected = await showSchoolSearchSheet(context);
                 if (selected != null) {
-                  _schoolController.text = selected;
+                  _schoolCtrl.text = selected.name;
+                  if (selected.nearestExamDate != null) {
+                    setExamDateOverride(ref, selected.nearestExamDate!);
+                  }
                   setState(() {});
                 }
               },
               child: AbsorbPointer(
                 child: CustomTextFormField(
-                  controller: _schoolController,
+                  controller: _schoolCtrl,
                   readOnly: true,
                   decoration: _fieldDecoration(
                     hintText: AppStrings.hintSchool,
@@ -395,7 +442,6 @@ class _SignupViewState extends ConsumerState<SignupView> {
                           color: BumditbulColor.black400, size: 20),
                     ),
                   ),
-                  validator: _validateSchoolName,
                 ),
               ),
             ),
@@ -415,7 +461,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
             ),
             if (authState.error != null) ...[
               AppDimens.gap16,
-              _ErrorBox(message: authState.error!),
+              ErrorBox(message: authState.error!),
             ],
           ],
         ),
@@ -423,7 +469,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
     );
   }
 
-  Widget _buildBottomButton(dynamic authState) {
+  Widget _buildBottomButton(AuthState authState) {
     if (_step == 1) {
       return DefaultButton(
         onPressed: _isStep1Valid
@@ -447,14 +493,12 @@ class _SignupViewState extends ConsumerState<SignupView> {
           ? null
           : () {
               if (_step2FormKey.currentState!.validate()) {
-                ref
-                    .read(authStateProvider.notifier)
-                    .signup(
-                      email: _emailController.text,
-                      password: _passwordController.text,
-                      nickname: _nicknameController.text,
-                      school: _schoolController.text.isNotEmpty
-                          ? _schoolController.text
+                ref.read(authStateProvider.notifier).signup(
+                      email: _emailCtrl.text.trim(),
+                      password: _passwordCtrl.text,
+                      nickname: _nicknameCtrl.text.trim(),
+                      school: _schoolCtrl.text.trim().isNotEmpty
+                          ? _schoolCtrl.text.trim()
                           : null,
                     );
               }
@@ -465,7 +509,8 @@ class _SignupViewState extends ConsumerState<SignupView> {
               width: 20,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(BumditbulColor.white),
+                valueColor:
+                    AlwaysStoppedAnimation<Color>(BumditbulColor.white),
               ),
             )
           : Text(
@@ -476,29 +521,9 @@ class _SignupViewState extends ConsumerState<SignupView> {
             ),
     );
   }
-}
 
-class _ErrorBox extends StatelessWidget {
-  final String message;
-
-  const _ErrorBox({required this.message});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: BumditbulColor.red.withValues(alpha: 0.1),
-        borderRadius: AppDimens.roundedS,
-        border: Border.all(color: BumditbulColor.red),
-      ),
-      child: Text(
-        message,
-        style: BumditbulTextStyle.bodyMedium1.copyWith(
-          color: BumditbulColor.red,
-        ),
-      ),
-    );
+  void _showSnack(String message, {bool isError = false}) {
+    if (!mounted) return;
+    showAppSnackBar(context, message, isError: isError);
   }
 }

@@ -2,55 +2,30 @@ import 'package:bumditbul_mobile/core/features/auth/domain/entities/user_entity.
 
 class UserModel extends User {
   const UserModel({
-    required super.id,
     required super.email,
     required super.nickname,
     super.school,
-    super.token,
+    super.profileImageUrl,
   });
 
-  factory UserModel.fromJson(Map<String, dynamic> json) {
-    // Defensive parsing with proper type checking
-    final id = json['id'];
-    final email = json['email'];
-    final nickname = json['nickname'];
+  factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
+        email: json['email'] as String? ?? '',
+        nickname: json['nickname'] as String? ?? '',
+        school: json['school'] as String?,
+        profileImageUrl: json['profileImageUrl'] as String?,
+      );
 
-    if (id == null || id is! String || id.isEmpty) {
-      throw FormatException('Invalid or missing id in UserModel.fromJson');
-    }
-    if (email == null || email is! String || email.isEmpty) {
-      throw FormatException('Invalid or missing email in UserModel.fromJson');
-    }
-    if (nickname == null || nickname is! String || nickname.isEmpty) {
-      throw FormatException('Invalid or missing nickname in UserModel.fromJson');
-    }
+  Map<String, dynamic> toJson() => {
+        'email': email,
+        'nickname': nickname,
+        if (school != null) 'school': school,
+        if (profileImageUrl != null) 'profileImageUrl': profileImageUrl,
+      };
 
-    return UserModel(
-      id: id,
-      email: email,
-      nickname: nickname,
-      school: json['school']?.toString(),
-      token: json['token']?.toString(),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'email': email,
-      'nickname': nickname,
-      'school': school,
-      'token': token,
-    };
-  }
-
-  factory UserModel.fromEntity(User user) {
-    return UserModel(
-      id: user.id,
-      email: user.email,
-      nickname: user.nickname,
-      school: user.school,
-      token: user.token,
-    );
-  }
+  factory UserModel.fromEntity(User user) => UserModel(
+        email: user.email,
+        nickname: user.nickname,
+        school: user.school,
+        profileImageUrl: user.profileImageUrl,
+      );
 }

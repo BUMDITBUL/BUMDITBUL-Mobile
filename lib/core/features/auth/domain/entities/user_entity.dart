@@ -3,36 +3,34 @@ import 'package:equatable/equatable.dart';
 const _unset = Object();
 
 class User extends Equatable {
-  final String id;
   final String email;
   final String nickname;
   final String? school;
-  final String? token;
+  final String? profileImageUrl;
 
   const User({
-    required this.id,
     required this.email,
     required this.nickname,
     this.school,
-    this.token,
+    this.profileImageUrl,
   });
 
-  @override
-  List<Object?> get props => [id, email, nickname, school, token];
-
   User copyWith({
-    String? id,
     String? email,
     String? nickname,
     Object? school = _unset,
-    Object? token = _unset,
+    Object? profileImageUrl = _unset,
   }) {
     return User(
-      id: id ?? this.id,
       email: email ?? this.email,
       nickname: nickname ?? this.nickname,
       school: school == _unset ? this.school : school as String?,
-      token: token == _unset ? this.token : token as String?,
+      profileImageUrl: profileImageUrl == _unset
+          ? this.profileImageUrl
+          : profileImageUrl as String?,
     );
   }
+
+  @override
+  List<Object?> get props => [email, nickname, school, profileImageUrl];
 }

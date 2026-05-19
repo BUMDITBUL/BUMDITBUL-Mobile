@@ -1,23 +1,23 @@
-import 'dart:convert';
-import 'dart:math';
+import 'dart:io';
 
+import 'package:bumditbul_mobile/core/features/auth/data/models/token_model.dart';
 import 'package:bumditbul_mobile/core/features/auth/data/models/user_model.dart';
+import 'package:bumditbul_mobile/core/network/api_endpoint.dart';
+import 'package:bumditbul_mobile/core/network/api_exception.dart';
 import 'package:dio/dio.dart';
 
 abstract class AuthRemoteDataSource {
-  /// 로그인 API 호출
-  Future<UserModel> login({required String email, required String password});
-
-  /// 회원가입 API 호출
-  Future<UserModel> signup({
-    required String email,
-    required String password,
-    required String nickname,
-    String? school,
-  });
-
-  /// 사용자 정보 조회 API 호출
-  Future<UserModel> getCurrentUser({required String token});
+  Future<bool> sendVerificationEmail({required String email});
+  Future<bool> verifyEmailCode({required String email, required String code});
+  Future<TokenModel> signup({required String email, required String password});
+  Future<TokenModel> login({required String email, required String password});
+  Future<void> logout({required String refreshToken});
+  Future<String> refreshAccessToken({required String refreshToken});
+  Future<void> withdraw();
+  Future<TokenModel> loginWithGoogle({required String idToken});
+  Future<UserModel> getProfile();
+  Future<UserModel> updateProfile({required String nickname, String? school});
+  Future<String> uploadProfileImage({required File image});
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -25,86 +25,169 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   AuthRemoteDataSourceImpl(this.dio);
 
-  String _generateSecureToken() {
-    final random = Random.secure();
-    final bytes = List<int>.generate(32, (_) => random.nextInt(256));
-    return base64Url.encode(bytes);
-  }
-
   @override
-  Future<UserModel> login({
-    required String email,
-    required String password,
-  }) async {
+  Future<bool> sendVerificationEmail({required String email}) async {
     try {
-      await Future.delayed(const Duration(milliseconds: 500));
-      if (!email.contains('@')) {
-        throw Exception('잘못된 이메일 형식입니다.');
-      }
-      if (password.length < 6) {
-        throw Exception('비밀번호는 6자리 이상이어야 합니다.');
-      }
-
-      return UserModel(
-        id: 'user_${email.split('@')[0]}',
-        email: email,
-        nickname: 'User_${DateTime.now().millisecondsSinceEpoch}',
-        token: _generateSecureToken(),
-      );
-    } catch (e) {
-      throw Exception('Login failed: $e');
+      final res = await dio.post(ApiEndpoint.emailSend, data: {'email': email});
+      return res.data['isDuplicate'] as bool? ?? false;
+    } on DioException catch (e) {
+      throw _handle(e);
     }
   }
 
   @override
-  Future<UserModel> signup({
+  Future<bool> verifyEmailCode({
+    required String email,
+    required String code,
+  }) async {
+    try {
+      final res = await dio.post(
+        ApiEndpoint.emailVerify,
+        data: {'email': email, 'code': code},
+      );
+      return res.data['verified'] as bool? ?? false;
+    } on DioException catch (e) {
+      throw _handle(e);
+    }
+  }
+
+  @override
+  Future<TokenModel> signup({
     required String email,
     required String password,
+  }) async {
+    try {
+      final res = await dio.post(
+        ApiEndpoint.signUp,
+        data: {'email': email, 'password': password},
+      );
+      return TokenModel.fromJson(res.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw _handle(e);
+    }
+  }
+
+  @override
+  Future<TokenModel> login({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final res = await dio.post(
+        ApiEndpoint.login,
+        data: {'email': email, 'password': password},
+      );
+      return TokenModel.fromJson(res.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw _handle(e);
+    }
+  }
+
+  @override
+  Future<void> logout({required String refreshToken}) async {
+    try {
+      await dio.post(ApiEndpoint.logout, data: {'refreshToken': refreshToken});
+    } on DioException catch (e) {
+      throw _handle(e);
+    }
+  }
+
+  @override
+  Future<String> refreshAccessToken({required String refreshToken}) async {
+    try {
+      final res = await dio.post(
+        ApiEndpoint.refreshToken,
+        data: {'refreshToken': refreshToken},
+      );
+      return res.data['accessToken'] as String;
+    } on DioException catch (e) {
+      throw _handle(e);
+    }
+  }
+
+  @override
+  Future<void> withdraw() async {
+    try {
+      await dio.delete(ApiEndpoint.withdraw);
+    } on DioException catch (e) {
+      throw _handle(e);
+    }
+  }
+
+  @override
+  Future<TokenModel> loginWithGoogle({required String idToken}) async {
+    try {
+      final res = await dio.post(
+        ApiEndpoint.googleOAuth,
+        data: {'idToken': idToken},
+      );
+      return TokenModel.fromJson(res.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw _handle(e);
+    }
+  }
+
+  @override
+  Future<UserModel> getProfile() async {
+    try {
+      final res = await dio.get(ApiEndpoint.profile);
+      return UserModel.fromJson(res.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw _handle(e);
+    }
+  }
+
+  @override
+  Future<UserModel> updateProfile({
     required String nickname,
     String? school,
   }) async {
     try {
-      await Future.delayed(const Duration(milliseconds: 500));
-      if (!email.contains('@')) {
-        throw Exception('잘못된 이메일 형식입니다.');
-      }
-      if (password.length < 6) {
-        throw Exception('비밀번호는 6자리 이상이어야 합니다.');
-      }
-      if (nickname.isEmpty) {
-        throw Exception('닉네임은 비어있을 수 없습니다.');
-      }
-
-      return UserModel(
-        id: 'user_${DateTime.now().millisecondsSinceEpoch}',
-        email: email,
-        nickname: nickname,
-        school: school,
-        token: _generateSecureToken(),
+      final res = await dio.patch(
+        ApiEndpoint.profile,
+        data: {
+          'nickname': nickname,
+          if (school != null) 'school': school,
+        },
       );
-    } catch (e) {
-      throw Exception('회원가입 오류: $e');
+      return UserModel.fromJson(res.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw _handle(e);
     }
   }
 
   @override
-  Future<UserModel> getCurrentUser({required String token}) async {
+  Future<String> uploadProfileImage({required File image}) async {
     try {
-      await Future.delayed(const Duration(milliseconds: 300));
-
-      // Validate token format
-      if (token.isEmpty || token.length < 10) {
-        throw Exception('유효하지 않은 토큰입니다.');
-      }
-
-      return UserModel(
-        id: 'mock_user_id',
-        email: 'user@example.com',
-        nickname: 'Mock User',
-        token: token,
+      final formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(
+          image.path,
+          filename: image.path.split('/').last,
+        ),
+      });
+      final res = await dio.post(
+        ApiEndpoint.profileImage,
+        data: formData,
+        options: Options(contentType: 'multipart/form-data'),
       );
-    } catch (e) {
-      throw Exception('현재 사용자를 불러오지 못했습니다. $e');
+      return res.data['profileImageUrl'] as String;
+    } on DioException catch (e) {
+      throw _handle(e);
     }
   }
+
+  ApiException _handle(DioException e) {
+    final data = e.response?.data;
+    final message = (data is Map ? data['message'] : null) as String? ??
+        _defaultMessage(e.response?.statusCode);
+    return ApiException(message, statusCode: e.response?.statusCode);
+  }
+
+  String _defaultMessage(int? status) => switch (status) {
+        400 => '입력값을 확인해주세요.',
+        401 => '이메일 또는 비밀번호가 올바르지 않습니다.',
+        404 => '요청한 정보를 찾을 수 없습니다.',
+        409 => '이미 가입된 이메일입니다.',
+        _ => '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
+      };
 }

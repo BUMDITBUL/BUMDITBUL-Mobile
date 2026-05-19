@@ -3,6 +3,7 @@ import 'package:bumditbul_mobile/constants/app_strings.dart';
 import 'package:bumditbul_mobile/constants/color.dart';
 import 'package:bumditbul_mobile/constants/text_style.dart';
 import 'package:bumditbul_mobile/core/components/button/default_button.dart';
+import 'package:bumditbul_mobile/core/components/error_box.dart';
 import 'package:bumditbul_mobile/core/components/text_form_field/text_form_field.dart';
 import 'package:bumditbul_mobile/core/components/text_form_field/text_form_field_label.dart';
 import 'package:bumditbul_mobile/core/features/auth/presentation/providers/auth_providers.dart';
@@ -163,7 +164,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                         ),
                         if (authState.error != null) ...[
                           AppDimens.gap24,
-                          _ErrorBox(message: authState.error!),
+                          ErrorBox(message: authState.error!),
                         ],
                       ],
                     ),
@@ -207,23 +208,3 @@ class _LoginViewState extends ConsumerState<LoginView> {
   }
 }
 
-/// 에러 메시지 박스 (login / signup 공용)
-class _ErrorBox extends StatelessWidget {
-  final String message;
-  const _ErrorBox({required this.message});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: BumditbulColor.red.withValues(alpha: 0.1),
-        borderRadius: AppDimens.roundedS,
-      ),
-      child: Text(
-        message,
-        style: BumditbulTextStyle.bodySmall.copyWith(color: BumditbulColor.red),
-      ),
-    );
-  }
-}
