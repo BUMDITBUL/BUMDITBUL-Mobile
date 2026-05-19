@@ -1,5 +1,6 @@
 import 'package:bumditbul_mobile/constants/color.dart';
 import 'package:bumditbul_mobile/constants/text_style.dart';
+import 'package:bumditbul_mobile/core/components/app_snack_bar.dart';
 import 'package:bumditbul_mobile/core/features/auth/presentation/providers/auth_providers.dart';
 import 'package:bumditbul_mobile/core/features/main/presentation/providers/study_provider.dart';
 import 'package:flutter/material.dart';
@@ -56,11 +57,22 @@ class ProfileView extends ConsumerWidget {
                                 width: 1,
                               ),
                             ),
-                            child: const Icon(
-                              Icons.person,
-                              color: BumditbulColor.black500,
-                              size: 52,
-                            ),
+                            clipBehavior: Clip.antiAlias,
+                            child: user?.profileImageUrl != null
+                                ? Image.network(
+                                    user!.profileImageUrl!,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => const Icon(
+                                      Icons.person,
+                                      color: BumditbulColor.black500,
+                                      size: 52,
+                                    ),
+                                  )
+                                : const Icon(
+                                    Icons.person,
+                                    color: BumditbulColor.black500,
+                                    size: 52,
+                                  ),
                           ),
                           const SizedBox(height: 12),
                           Text(
@@ -154,8 +166,6 @@ class ProfileView extends ConsumerWidget {
                               '$streak일',
                               style: BumditbulTextStyle.headline2.copyWith(
                                 color: BumditbulColor.white,
-                                fontSize: 22,
-                                fontWeight: FontWeight.w700,
                               ),
                             ),
                           ),
@@ -171,10 +181,6 @@ class ProfileView extends ConsumerWidget {
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: BumditbulColor.black850,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
                   child: Column(
                     children: [
                       Text(
@@ -186,8 +192,7 @@ class ProfileView extends ConsumerWidget {
                       ),
                       const SizedBox(height: 16),
                       SizedBox(
-                        width: 140,
-                        height: 44,
+                        width: 120,
                         child: ElevatedButton(
                           onPressed: () => context.push('/exam-scope'),
                           style: ElevatedButton.styleFrom(
@@ -235,9 +240,10 @@ class ProfileView extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   GestureDetector(
-                    onTap: () {
-                      ref.read(authStateProvider.notifier).logout();
-                      context.go('/');
+                    onTap: () async {
+                      clearExamDateOverride(ref);
+                      await ref.read(authStateProvider.notifier).logout();
+                      if (context.mounted) context.go('/');
                     },
                     child: Text(
                       '로그아웃',
@@ -328,10 +334,23 @@ void _showWithdrawalDialog(BuildContext context, WidgetRef ref) {
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       Navigator.of(ctx).pop();
-                      ref.read(authStateProvider.notifier).logout();
-                      GoRouter.of(context).go('/');
+                      try {
+                        clearExamDateOverride(ref);
+                        await ref.read(authStateProvider.notifier).withdraw();
+                        if (context.mounted) {
+                          GoRouter.of(context).go('/');
+                        }
+                      } catch (_) {
+                        if (context.mounted) {
+                          showAppSnackBar(
+                            context,
+                            '탈퇴 처리 중 오류가 발생했습니다.',
+                            isError: true,
+                          );
+                        }
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: BumditbulColor.red,
