@@ -55,7 +55,7 @@ class HomeView extends ConsumerWidget {
           SafeArea(
             child: Column(
               children: [
-                _buildHeader(context, authState.user?.nickname, authState.user?.profileImageUrl),
+                _buildHeader(context, ref, authState.user?.nickname, authState.user?.profileImageUrl),
                 Expanded(
                   child: CustomScrollView(
                     slivers: [
@@ -89,13 +89,17 @@ class HomeView extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context, String? nickname, String? profileImageUrl) {
+  Widget _buildHeader(BuildContext context, WidgetRef ref, String? nickname, String? profileImageUrl) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Image.asset('assets/images/header_logo.png', height: 36),
+          // TODO: 더미 데이터 버튼 — 확인 후 제거
+          GestureDetector(
+            onTap: () => ref.read(dailyPlanProvider.notifier).loadDummy(),
+            child: Image.asset('assets/images/header_logo.png', height: 36),
+          ),
           GestureDetector(
             onTap: () => context.push('/profile'),
             child: Row(
@@ -170,10 +174,10 @@ class HomeView extends ConsumerWidget {
             child: Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.06),
+                color: BumditbulColor.white.withValues(alpha: 0.06),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.12),
+                  color: BumditbulColor.white.withValues(alpha: 0.12),
                   width: 0.5,
                 ),
               ),

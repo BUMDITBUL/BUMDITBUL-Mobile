@@ -40,7 +40,7 @@ abstract final class AppDialog {
   }) {
     return showDialog<bool>(
       context: context,
-      barrierColor: Colors.black54,
+      barrierColor: BumditbulColor.black900,
       builder: (ctx) => Dialog(
         backgroundColor: BumditbulColor.popUp,
         shape: RoundedRectangleBorder(borderRadius: AppDimens.roundedXL),

@@ -66,16 +66,45 @@ class ExamScopeView extends ConsumerStatefulWidget {
   ConsumerState<ExamScopeView> createState() => _ExamScopeViewState();
 }
 
+String _apiToKorean(String api) => switch (api.toUpperCase()) {
+  'HIGH' => '상',
+  'LOW' => '하',
+  _ => '중',
+};
+
 class _ExamScopeViewState extends ConsumerState<ExamScopeView> {
   final List<ExamSubjectEntry> _subjects = [];
   bool _hasChanges = false;
+  bool _initialized = false;
   int _remainingGenerations = 2;
   static const int _maxGenerations = 2;
 
   @override
   void initState() {
     super.initState();
-    _addSubject();
+    // subjects는 build에서 subjectProvider 로드 후 초기화
+  }
+
+  void _initSubjectsIfNeeded(List<Subject> existing) {
+    if (_initialized) return;
+    _initialized = true;
+    setState(() {
+      _subjects.clear();
+      if (existing.isEmpty) {
+        _subjects.add(ExamSubjectEntry());
+      } else {
+        for (final s in existing) {
+          final entry = ExamSubjectEntry();
+          entry.nameCtrl.text = s.subjectName;
+          entry.difficulty = _apiToKorean(s.difficulty);
+          entry.examDate = s.testSchedule != null
+              ? DateTime.tryParse(s.testSchedule!)
+              : null;
+          _subjects.add(entry);
+        }
+      }
+      _hasChanges = false;
+    });
   }
 
   @override
@@ -237,6 +266,11 @@ class _ExamScopeViewState extends ConsumerState<ExamScopeView> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(subjectProvider).whenOrNull(
+      data: (subjects) => _initSubjectsIfNeeded(subjects),
+      error: (_, __) => _initSubjectsIfNeeded([]),
+    );
+
     return PopScope(
       canPop: !_hasChanges,
       onPopInvokedWithResult: (didPop, _) async {

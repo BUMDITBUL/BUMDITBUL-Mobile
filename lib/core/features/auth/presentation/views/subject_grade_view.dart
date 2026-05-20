@@ -18,14 +18,14 @@ Widget dismissBackground({
   return Container(
     margin: margin,
     decoration: BoxDecoration(
-      color: Colors.red,
+      color: BumditbulColor.red,
       borderRadius: BorderRadius.circular(borderRadius),
     ),
     alignment: Alignment.centerRight,
     padding: const EdgeInsets.only(right: 20),
     child: const Icon(
       Icons.delete,
-      color: Colors.white,
+      color: BumditbulColor.white,
     ),
   );
 }

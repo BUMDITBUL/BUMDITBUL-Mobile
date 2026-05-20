@@ -281,7 +281,7 @@ class ProfileView extends ConsumerWidget {
 void _showWithdrawalDialog(BuildContext context, WidgetRef ref) {
   showDialog(
     context: context,
-    barrierColor: Colors.black54,
+    barrierColor: BumditbulColor.black900,
     builder: (ctx) => Dialog(
       backgroundColor: BumditbulColor.black850,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
