@@ -6,6 +6,8 @@ import 'package:bumditbul_mobile/core/features/main/presentation/providers/study
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:iconify_flutter/icons/ic.dart';
 
 class ProfileView extends ConsumerWidget {
   const ProfileView({super.key});
@@ -62,16 +64,14 @@ class ProfileView extends ConsumerWidget {
                                 ? Image.network(
                                     user!.profileImageUrl!,
                                     fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) => const Icon(
-                                      Icons.person,
+                                    errorBuilder: (_, __, ___) => const Iconify(
+                                      Ic.round_person,
                                       color: BumditbulColor.black500,
-                                      size: 52,
                                     ),
                                   )
-                                : const Icon(
-                                    Icons.person,
+                                : const Iconify(
+                                    Ic.round_person,
                                     color: BumditbulColor.black500,
-                                    size: 52,
                                   ),
                           ),
                           const SizedBox(height: 12),
@@ -290,8 +290,8 @@ void _showWithdrawalDialog(BuildContext context, WidgetRef ref) {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
-              Icons.warning_amber_rounded,
+            const Iconify(
+              Ic.round_warning_amber,
               color: BumditbulColor.red,
               size: 40,
             ),
@@ -441,8 +441,8 @@ class _ActionButton extends StatelessWidget {
                 color: BumditbulColor.white,
               ),
             ),
-            const Icon(
-              Icons.edit_outlined,
+            const Iconify(
+              Ic.outline_edit,
               color: BumditbulColor.black500,
               size: 16,
             ),

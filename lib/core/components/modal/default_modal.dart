@@ -2,6 +2,8 @@ import 'package:bumditbul_mobile/constants/color.dart';
 import 'package:bumditbul_mobile/constants/text_style.dart';
 import 'package:bumditbul_mobile/core/components/button/default_button.dart';
 import 'package:flutter/material.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:iconify_flutter/icons/ic.dart';
 
 class DefaultModal extends StatelessWidget {
   final String title;
@@ -79,8 +81,8 @@ class DefaultModal extends StatelessWidget {
                 ),
                 IconButton(
                   onPressed: onClose ?? () => Navigator.of(context).pop(),
-                  icon: const Icon(
-                    Icons.close,
+                  icon: const Iconify(
+                    Ic.round_close,
                     color: BumditbulColor.black400,
                     size: 20,
                   ),

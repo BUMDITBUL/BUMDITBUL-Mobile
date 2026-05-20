@@ -492,8 +492,9 @@ class _ExamScopeViewState extends ConsumerState<ExamScopeView> {
                       onPressed: _remainingGenerations > 0
                           ? () async {
                               final confirm = await _showSaveConfirmDialog();
-                              if (!(confirm ?? false) || !context.mounted)
+                              if (!(confirm ?? false) || !context.mounted) {
                                 return;
+                              }
 
                               final inputs = _buildSubjectInputs();
                               if (inputs.isEmpty) {

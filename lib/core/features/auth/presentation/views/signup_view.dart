@@ -5,6 +5,8 @@ import 'package:bumditbul_mobile/constants/app_strings.dart';
 import 'package:bumditbul_mobile/constants/color.dart';
 import 'package:bumditbul_mobile/constants/text_style.dart';
 import 'package:bumditbul_mobile/core/components/app_snack_bar.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:iconify_flutter/icons/ic.dart';
 import 'package:bumditbul_mobile/core/components/button/default_button.dart';
 import 'package:bumditbul_mobile/core/components/text_form_field/text_form_field.dart';
 import 'package:bumditbul_mobile/core/components/text_form_field/text_form_field_label.dart';
@@ -191,7 +193,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
                     context.go(AppRoutes.splash);
                   }
                 },
-                icon: const Icon(Icons.arrow_back_ios, color: BumditbulColor.white),
+                icon: const Iconify(Ic.round_arrow_back_ios, color: BumditbulColor.white, size: 20),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
               ),

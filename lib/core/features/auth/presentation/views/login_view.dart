@@ -8,6 +8,8 @@ import 'package:bumditbul_mobile/core/components/text_form_field/text_form_field
 import 'package:bumditbul_mobile/core/components/text_form_field/text_form_field_label.dart';
 import 'package:bumditbul_mobile/core/features/auth/presentation/providers/auth_providers.dart';
 import 'package:bumditbul_mobile/core/features/schedule/presentation/providers/schedule_providers.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:iconify_flutter/icons/ic.dart';
 import 'package:bumditbul_mobile/core/router/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -111,8 +113,8 @@ class _LoginViewState extends ConsumerState<LoginView> {
               AppDimens.gap8,
               IconButton(
                 onPressed: () => context.go(AppRoutes.splash),
-                icon: const Icon(Icons.arrow_back_ios,
-                    color: BumditbulColor.white),
+                icon: const Iconify(Ic.round_arrow_back_ios,
+                    color: BumditbulColor.white, size: 20),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
               ),

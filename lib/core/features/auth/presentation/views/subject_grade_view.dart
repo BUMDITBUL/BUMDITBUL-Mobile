@@ -3,7 +3,6 @@ import 'package:bumditbul_mobile/constants/text_style.dart';
 import 'package:bumditbul_mobile/core/components/button/default_button.dart';
 import 'package:bumditbul_mobile/core/components/button/difficulty_dropdown.dart';
 import 'package:bumditbul_mobile/core/features/main/presentation/providers/study_provider.dart';
-import 'package:bumditbul_mobile/core/features/schedule/presentation/providers/schedule_providers.dart';
 import 'package:bumditbul_mobile/core/features/subject/domain/entities/subject_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

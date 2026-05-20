@@ -12,6 +12,10 @@ import 'package:bumditbul_mobile/core/features/main/presentation/widgets/study_s
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:bumditbul_mobile/constants/app_icons.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:iconify_flutter/icons/ic.dart';
+import 'package:iconify_flutter/icons/mdi.dart';
 
 class HomeView extends ConsumerWidget {
   const HomeView({super.key});
@@ -55,7 +59,12 @@ class HomeView extends ConsumerWidget {
           SafeArea(
             child: Column(
               children: [
-                _buildHeader(context, ref, authState.user?.nickname, authState.user?.profileImageUrl),
+                _buildHeader(
+                  context,
+                  ref,
+                  authState.user?.nickname,
+                  authState.user?.profileImageUrl,
+                ),
                 Expanded(
                   child: CustomScrollView(
                     slivers: [
@@ -89,7 +98,12 @@ class HomeView extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context, WidgetRef ref, String? nickname, String? profileImageUrl) {
+  Widget _buildHeader(
+    BuildContext context,
+    WidgetRef ref,
+    String? nickname,
+    String? profileImageUrl,
+  ) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       child: Row(
@@ -129,16 +143,14 @@ class HomeView extends ConsumerWidget {
                       ? Image.network(
                           profileImageUrl,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => const Icon(
-                            Icons.person_outline,
+                          errorBuilder: (_, __, ___) => const Iconify(
+                            Ic.round_person,
                             color: BumditbulColor.black400,
-                            size: 20,
                           ),
                         )
-                      : const Icon(
-                          Icons.person_outline,
+                      : const Iconify(
+                          Ic.round_person,
                           color: BumditbulColor.black400,
-                          size: 20,
                         ),
                 ),
               ],
@@ -224,8 +236,8 @@ class HomeView extends ConsumerWidget {
                           color: BumditbulColor.green600.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Icon(
-                          Icons.edit_calendar_outlined,
+                        child: const Iconify(
+                          Ic.round_edit_calendar,
                           color: BumditbulColor.green400,
                           size: 18,
                         ),

@@ -89,12 +89,6 @@ class ScheduleView extends ConsumerWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.event_note_outlined,
-            color: BumditbulColor.black700,
-            size: 48,
-          ),
-          const SizedBox(height: 12),
           Text(
             '이 날은 공부 계획이 없어요.',
             style: BumditbulTextStyle.bodyLarge1.copyWith(

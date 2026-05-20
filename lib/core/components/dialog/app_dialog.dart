@@ -3,12 +3,14 @@ import 'package:bumditbul_mobile/constants/app_strings.dart';
 import 'package:bumditbul_mobile/constants/color.dart';
 import 'package:bumditbul_mobile/constants/text_style.dart';
 import 'package:flutter/material.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:iconify_flutter/icons/ic.dart';
 
 abstract final class AppDialog {
   static Future<bool?> showUnsaved(BuildContext context) {
     return _showConfirm(
       context: context,
-      icon: Icons.warning_amber_rounded,
+      iconSvg: Ic.round_warning_amber,
       iconColor: BumditbulColor.green400,
       title: AppStrings.dialogUnsavedTitle,
       body: AppStrings.dialogUnsavedBody,
@@ -20,7 +22,7 @@ abstract final class AppDialog {
   static Future<bool?> showWithdrawal(BuildContext context) {
     return _showConfirm(
       context: context,
-      icon: Icons.warning_amber_rounded,
+      iconSvg: Ic.round_warning_amber,
       iconColor: BumditbulColor.red,
       title: AppStrings.dialogWithdrawalTitle,
       body: AppStrings.dialogWithdrawalBody,
@@ -31,7 +33,7 @@ abstract final class AppDialog {
 
   static Future<bool?> _showConfirm({
     required BuildContext context,
-    required IconData icon,
+    required String iconSvg,
     required Color iconColor,
     required String title,
     required String body,
@@ -49,7 +51,7 @@ abstract final class AppDialog {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, color: iconColor, size: 40),
+              Iconify(iconSvg, color: iconColor, size: 40),
               AppDimens.gap16,
               Text(
                 title,

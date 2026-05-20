@@ -2,6 +2,8 @@ import 'package:bumditbul_mobile/constants/color.dart';
 import 'package:bumditbul_mobile/constants/text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:iconify_flutter/icons/ic.dart';
 
 class MainView extends StatelessWidget {
   final Widget child;
@@ -50,20 +52,20 @@ class MainView extends StatelessWidget {
           ),
           type: BottomNavigationBarType.fixed,
           elevation: 0,
-          items: const [
+          items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
+              icon: Iconify(Ic.round_home, size: 24, color: BumditbulColor.black600),
+              activeIcon: Iconify(Ic.round_home, size: 24, color: BumditbulColor.green400),
               label: '홈',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_month_outlined),
-              activeIcon: Icon(Icons.calendar_month),
+              icon: Iconify(Ic.outline_calendar_month, size: 24, color: BumditbulColor.black600),
+              activeIcon: Iconify(Ic.round_calendar_month, size: 24, color: BumditbulColor.green400),
               label: '일정',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
+              icon: Iconify(Ic.outline_person, size: 24, color: BumditbulColor.black600),
+              activeIcon: Iconify(Ic.round_person, size: 24, color: BumditbulColor.green400),
               label: '프로필',
             ),
           ],

@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:bumditbul_mobile/constants/color.dart';
 import 'package:bumditbul_mobile/constants/text_style.dart';
 import 'package:bumditbul_mobile/core/components/app_snack_bar.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:iconify_flutter/icons/ic.dart';
 import 'package:bumditbul_mobile/core/services/neis_service.dart';
 import 'package:flutter/material.dart';
 
@@ -313,8 +315,8 @@ class _SchoolSearchSheetState extends State<_SchoolSearchSheet> {
               _step = _Step.search;
               _selectedGrade = null;
             }),
-            child: const Icon(
-              Icons.arrow_back_ios,
+            child: const Iconify(
+              Ic.round_arrow_back_ios,
               color: BumditbulColor.white,
               size: 18,
             ),
@@ -492,8 +494,8 @@ class _SchoolSearchSheetState extends State<_SchoolSearchSheet> {
         ),
         GestureDetector(
           onTap: () => Navigator.of(context).pop(),
-          child: const Icon(
-            Icons.close,
+          child: const Iconify(
+            Ic.round_close,
             color: BumditbulColor.black400,
             size: 20,
           ),

@@ -3,6 +3,10 @@ import 'dart:io';
 import 'package:bumditbul_mobile/constants/color.dart';
 import 'package:bumditbul_mobile/constants/text_style.dart';
 import 'package:bumditbul_mobile/core/components/app_snack_bar.dart';
+import 'package:bumditbul_mobile/constants/app_icons.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:iconify_flutter/icons/ic.dart';
+import 'package:iconify_flutter/icons/mdi.dart';
 import 'package:bumditbul_mobile/core/components/button/default_button.dart';
 import 'package:bumditbul_mobile/core/components/dialog/app_dialog.dart';
 import 'package:bumditbul_mobile/core/features/auth/presentation/providers/auth_providers.dart';
@@ -145,10 +149,10 @@ class _ProfileEditViewState extends ConsumerState<ProfileEditView> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
-                        Icons.chevron_left,
+                      const Iconify(
+                        Ic.round_arrow_back_ios,
                         color: BumditbulColor.white,
-                        size: 22,
+                        size: 20,
                       ),
                     ],
                   ),
@@ -211,8 +215,8 @@ class _ProfileEditViewState extends ConsumerState<ProfileEditView> {
                                         profileImageUrl,
                                         fit: BoxFit.cover,
                                       )
-                                    : const Icon(
-                                        Icons.person,
+                                    : const Iconify(
+                                        Ic.round_person,
                                         color: BumditbulColor.black500,
                                         size: 48,
                                       ),
@@ -231,10 +235,10 @@ class _ProfileEditViewState extends ConsumerState<ProfileEditView> {
                                       width: 2,
                                     ),
                                   ),
-                                  child: const Icon(
-                                    Icons.camera_alt_outlined,
+                                  child: const Iconify(
+                                    AppIcons.cameraThin,
                                     color: BumditbulColor.white,
-                                    size: 14,
+                                    size: 16,
                                   ),
                                 ),
                               ),
